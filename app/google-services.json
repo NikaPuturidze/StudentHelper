@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "732539450912",
+    "firebase_url": "https://studenthelper-dark-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "studenthelper-dark",
+    "storage_bucket": "studenthelper-dark.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:732539450912:android:8754dc4dfa1d803d8c2e45",
+        "android_client_info": {
+          "package_name": "com.darkindustry.studenthelper"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "732539450912-3pr8ri5a9fo5o4569g697ibb3gnphb0m.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.darkindustry.studenthelper",
+            "certificate_hash": "bae5ab1bcc00e0276dae0c6a35522dc48adbeda8"
+          }
+        },
+        {
+          "client_id": "732539450912-uhvimq09rukp649r9bu35lejpvifvg7a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB2RmE4Kwmzy8lWU8OYZjrZ3Vg17hamKLQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "732539450912-uhvimq09rukp649r9bu35lejpvifvg7a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
