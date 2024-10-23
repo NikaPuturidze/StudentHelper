@@ -1,5 +1,6 @@
 package com.darkindustry.studenthelper.logic.utils
 
+import android.util.Log
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.LinearOutSlowInEasing
@@ -23,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberUpdatedState
@@ -79,7 +81,7 @@ fun MessageBox(
     }
 
     Column {
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(12.dp))
         AnimatedVisibility(
             visible = isVisible,
             enter = slideInVertically(
@@ -94,7 +96,7 @@ fun MessageBox(
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 72.dp)
+                    .heightIn(min = 64.dp)
                     .padding(horizontal = 16.dp)
                     .clip(shape = RoundedCornerShape(12.dp))
                     .background(

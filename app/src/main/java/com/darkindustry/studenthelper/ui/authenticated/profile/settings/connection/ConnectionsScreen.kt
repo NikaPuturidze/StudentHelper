@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -44,11 +45,13 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -61,6 +64,7 @@ import com.darkindustry.studenthelper.logic.api.tsu.ApiViewModel
 import com.darkindustry.studenthelper.logic.firebase.FirestoreListener
 import com.darkindustry.studenthelper.logic.utils.MessageBox
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.CustomHeader
+import com.darkindustry.studenthelper.logic.utils.Utils.Companion.GLOBAL_ELEVATION
 import com.darkindustry.studenthelper.ui.authenticated.profile.ProfileViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
@@ -72,7 +76,7 @@ fun ConnectionScreen(
     navController: NavHostController,
 ) {
     rememberSystemUiController().apply {
-        setStatusBarColor(color = MaterialTheme.colorScheme.background)
+        setStatusBarColor(color = MaterialTheme.colorScheme.onBackground)
         setNavigationBarColor(color = MaterialTheme.colorScheme.background)
     }
 
@@ -133,8 +137,9 @@ fun ConnectionScreen(
     )
 }
 
-@SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
 @Composable
+@JvmOverloads
+@SuppressLint("SetJavaScriptEnabled", "JavascriptInterface")
 fun VisitWebsite(
     url: String,
     apiViewModel: ApiViewModel = hiltViewModel(),
@@ -256,26 +261,14 @@ fun ConnectionScreenForm(
     showSheet: (Boolean) -> Unit,
     onUnlinkUniversity: () -> Unit,
 ) {
-    CustomHeader(title = "Link University", left = {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_arrow_left),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(32.dp)
-        )
-    },
+    CustomHeader(
+        title = stringResource(R.string.authenticated_settings_connecions_header),
+        leftIcon = R.drawable.ic_arrow_left,
         onLeftClick = { navController.popBackStack() },
-        right = {
-            if (universityLinked.isEmpty()) {
-                Text(
-                    text = "Add",
-                    style = MaterialTheme.typography.titleMedium.copy(
-                        color = MaterialTheme.colorScheme.primary,
-                        fontSize = 16.sp,
-                    )
-                )
-            }
-
+        rightIcon = if (universityLinked.isEmpty()) {
+            R.drawable.ic_add
+        } else {
+            null
         },
         onRightClick = {
             if (universityLinked.isEmpty()) {
@@ -290,48 +283,50 @@ fun ConnectionScreenForm(
             .padding(vertical = 8.dp, horizontal = 8.dp)
     ) {
         if (universityLinked.isNotEmpty()) {
-            Column(
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .shadow(
+                        elevation = GLOBAL_ELEVATION,
+                        shape = RoundedCornerShape(12.dp),
+                        clip = true,
+                    )
                     .background(
                         color = MaterialTheme.colorScheme.onBackground,
-                        shape = RoundedCornerShape(8.dp)
+                        shape = RoundedCornerShape(12.dp)
                     )
+                    .padding(vertical = 12.dp, horizontal = 12.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
+                Image(
+                    painter = painterResource(id = R.drawable.ic_uni_tsu),
+                    contentDescription = null,
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Image(
-                        painter = painterResource(id = R.drawable.ic_uni_tsu),
-                        contentDescription = null,
+                        .size(32.dp)
+                        .clip(CircleShape)
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Text(
+                    text = universityLinked,
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontSize = 17.sp,
+                        color = MaterialTheme.colorScheme.secondary
+                    ),
+                    modifier = Modifier
+                        .offset(y = (2).dp)
+                )
+                Spacer(modifier = Modifier.weight(1f))
+                IconButton(onClick = {
+                    onUnlinkUniversity()
+                }) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_cancel),
+                        contentDescription = "Unlink University",
+                        tint = MaterialTheme.colorScheme.secondary,
                         modifier = Modifier
-                            .size(32.dp)
+                            .size(20.dp)
                             .clip(CircleShape)
                     )
-                    Spacer(modifier = Modifier.width(12.dp))
-                    Text(
-                        text = universityLinked,
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 17.sp,
-                            color = MaterialTheme.colorScheme.secondary
-                        )
-                    )
-                    Spacer(modifier = Modifier.weight(1f))
-                    IconButton(onClick = {
-                        onUnlinkUniversity()
-                    }) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_cancel),
-                            contentDescription = "Unlink University",
-                            tint = MaterialTheme.colorScheme.secondary,
-                            modifier = Modifier
-                                .size(20.dp)
-                                .clip(CircleShape)
-                        )
-                    }
                 }
             }
         }
@@ -383,7 +378,7 @@ fun BottomSheet(
                     value = searchQuery,
                     onValueChange = { searchQuery = it },
                     placeholder = {
-                        Text(text = "Search")
+                        Text(text = stringResource(R.string.authenticated_settings_connecions_bottom_sheet_search_placeholder))
                     },
                     leadingIcon = {
                         Icon(
@@ -421,7 +416,7 @@ fun BottomSheet(
 
             if (filteredUniversities.isEmpty()) {
                 Text(
-                    text = "No universities found.",
+                    text = stringResource(R.string.authenticated_settings_connecions_bottom_sheet_search_notihng_found_text),
                     style = MaterialTheme.typography.titleMedium.copy(
                         color = MaterialTheme.colorScheme.error,
                         fontSize = 17.sp,

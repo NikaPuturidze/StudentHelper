@@ -1,5 +1,7 @@
 package com.darkindustry.studenthelper.ui.authentication.login.passwordRecovery
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.lifecycle.viewModelScope
 import com.darkindustry.studenthelper.logic.data.ApplicationRepository
 import com.darkindustry.studenthelper.logic.data.ApplicationViewModel
@@ -87,6 +89,24 @@ class PasswordRecoveryViewModel @Inject constructor(
                     onFailure()
                 }
             )
+        }
+    }
+
+    fun checkEmail(
+        newEmail: String,
+        onSuccess: () -> Unit = {},
+        onFailure: () -> Unit = {}
+    ) {
+        doesUserExist(newEmail, applicationRepository) { exists ->
+            if (!exists) {
+                setMessage(
+                    "შეყვანილ ელ.ფოსტასთან არ არის დაკავშირებული არცერთი ანგარიში.",
+                    MessageType.ERROR
+                )
+                onFailure()
+            } else {
+                onSuccess()
+            }
         }
     }
 

@@ -27,7 +27,7 @@ fun CatalogScreen(
     paddingValues: PaddingValues
 ){
     rememberSystemUiController().apply {
-        setStatusBarColor(color = MaterialTheme.colorScheme.background)
+        setStatusBarColor(color = MaterialTheme.colorScheme.onBackground)
         setNavigationBarColor(color = MaterialTheme.colorScheme.onBackground)
     }
 

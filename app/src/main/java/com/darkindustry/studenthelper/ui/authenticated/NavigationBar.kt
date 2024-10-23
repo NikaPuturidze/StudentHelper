@@ -2,6 +2,7 @@ package com.darkindustry.studenthelper.ui.authenticated
 
 import android.os.Build
 import androidx.annotation.RequiresApi
+import androidx.annotation.RequiresExtension
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
@@ -10,6 +11,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -28,6 +30,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -53,32 +56,33 @@ data class BottomNavigationItem(
             BottomNavigationItem(
                 icon = painterResource(id = R.drawable.ic_house),
                 route = NavigationRoute.Authenticated.Home.route,
-                label = "მთავარი"
+                label = stringResource(R.string.authenticated_navigationbar_home)
             ),
             BottomNavigationItem(
                 icon = painterResource(id = R.drawable.ic_catalog),
                 route = NavigationRoute.Authenticated.Catalog.route,
-                label = "კატალოგი"
+                label = stringResource(R.string.authenticated_navigationbar_catalog)
             ),
             BottomNavigationItem(
                 icon = painterResource(id = R.drawable.ic_calendar),
                 route = NavigationRoute.Authenticated.Schedule.route,
-                label = "ცხრილი"
+                label = stringResource(R.string.authenticated_navigationbar_schedule)
             ),
             BottomNavigationItem(
                 icon = painterResource(id = R.drawable.ic_results),
                 route = NavigationRoute.Authenticated.Results.route,
-                label = "შედეგები"
+                label = stringResource(R.string.authenticated_navigationbar_results)
             ),
             BottomNavigationItem(
                 icon = painterResource(id = R.drawable.ic_user_filled),
                 route = NavigationRoute.Authenticated.Profile.route,
-                label = "პროფილი"
+                label = stringResource(R.string.authenticated_navigationbar_profile)
             ),
         )
     }
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun NavigationBar(
@@ -156,6 +160,8 @@ fun NavigationBar(
                                 colors = NavigationBarItemDefaults.colors(
                                     selectedIconColor = MaterialTheme.colorScheme.primary,
                                     selectedTextColor = MaterialTheme.colorScheme.primary,
+                                    unselectedIconColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f),
+                                    unselectedTextColor = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f),
                                     indicatorColor = Color.Transparent
                                 )
                             )

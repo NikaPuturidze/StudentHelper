@@ -41,23 +41,20 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.darkindustry.studenthelper.R
-import com.darkindustry.studenthelper.navigation.NavigationRoute
 import com.darkindustry.studenthelper.logic.utils.MessageBox
 import com.darkindustry.studenthelper.logic.utils.Utils
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationButton
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationTextField
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.GLOBAL_ELEVATION
+import com.darkindustry.studenthelper.navigation.NavigationRoute
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
@@ -82,7 +79,7 @@ fun RegistrationScreen(
     var isLoading by remember { mutableStateOf(false) }
 
     if (isLoading) {
-        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center){
+        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
         }
     } else {
@@ -134,10 +131,10 @@ fun RegistrationContentMainForm(
         RegistrationHeader()
         Spacer(modifier = Modifier.weight(0.4f))
         ApplicationTextField(
-            topText = stringResource(id = R.string.registration_email_label),
+            topText = stringResource(id = R.string.authentication_registration_email_label),
             value = email,
             onValueChange = registrationViewModel::onEmailChange,
-            placeholderText = stringResource(id = R.string.registration_email_placeholder),
+            placeholderText = stringResource(id = R.string.authentication_registration_email_placeholder),
             leadingIcon = {
                 Image(
                     painter = painterResource(id = R.drawable.ic_envelope),
@@ -148,10 +145,10 @@ fun RegistrationContentMainForm(
             })
         Spacer(modifier = Modifier.weight(0.1f))
         ApplicationTextField(
-            topText = stringResource(id = R.string.registration_username_label),
+            topText = stringResource(id = R.string.authentication_registration_username_label),
             value = username,
             onValueChange = registrationViewModel::onUsernameChange,
-            placeholderText = stringResource(id = R.string.registration_username_placeholder),
+            placeholderText = stringResource(id = R.string.authentication_registration_username_placeholder),
             leadingIcon = {
                 Image(
                     painter = painterResource(id = R.drawable.ic_envelope),
@@ -162,10 +159,10 @@ fun RegistrationContentMainForm(
             })
         Spacer(modifier = Modifier.weight(0.1f))
         ApplicationTextField(
-            topText = stringResource(id = R.string.registration_password_label),
+            topText = stringResource(id = R.string.authentication_registration_password_label),
             value = password,
             onValueChange = registrationViewModel::onPasswordChange,
-            placeholderText = stringResource(id = R.string.registration_password_placeholder),
+            placeholderText = stringResource(id = R.string.authentication_registration_password_placeholder),
             leadingIcon = {
                 Image(
                     painter = painterResource(id = R.drawable.ic_lock),
@@ -189,7 +186,11 @@ fun RegistrationContentMainForm(
                         } else {
                             "Show password"
                         },
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f)),
+                        colorFilter = ColorFilter.tint(
+                            MaterialTheme.colorScheme.secondary.copy(
+                                alpha = 0.67f
+                            )
+                        ),
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -202,7 +203,7 @@ fun RegistrationContentMainForm(
         )
         Spacer(modifier = Modifier.weight(0.3f))
         ApplicationButton(
-            text = stringResource(R.string.registration_register_button),
+            text = stringResource(R.string.authentication_registration_register_button),
             onClick = {
                 focusManager.clearFocus()
                 isLoading(true)
@@ -219,7 +220,18 @@ fun RegistrationContentMainForm(
                                         .replace("{email}", email)
                                         .replace("{username}", username)
                                         .replace("{password}", password)
-                                )
+                                ) {
+                                    launchSingleTop = true
+                                    popUpTo(
+                                        NavigationRoute.Authentication.Registration.VerifyEmail.route
+                                            .replace("{email}", email)
+                                            .replace("{username}", username)
+                                            .replace("{password}", password)
+                                    ) {
+                                        saveState = true
+                                    }
+                                    restoreState = true
+                                }
                             },
                             onFailure = {
                                 isLoading(false)
@@ -237,7 +249,7 @@ fun RegistrationContentMainForm(
         Spacer(modifier = Modifier.weight(0.2f))
         SocialRegistrationOptions()
         Spacer(modifier = Modifier.weight(1f))
-        LoginPrompt { navController.popBackStack()}
+        LoginPrompt { navController.popBackStack() }
         Spacer(modifier = Modifier.height(32.dp))
     }
 }
@@ -250,7 +262,7 @@ private fun RegistrationHeader() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.registration_header),
+            text = stringResource(R.string.authentication_registration_header),
             style = MaterialTheme.typography.displayMedium.copy(
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -266,7 +278,7 @@ private fun RegistrationSocialHeader() {
         horizontalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(R.string.registration_social_header),
+            text = stringResource(R.string.authentication_registration_social_header),
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f),
                 textAlign = TextAlign.Center
@@ -335,7 +347,7 @@ private fun LoginPrompt(onClick: () -> Unit) {
                     letterSpacing = MaterialTheme.typography.bodyLarge.letterSpacing,
                 )
             ) {
-                append(stringResource(R.string.registration_login_prompt))
+                append(stringResource(R.string.authentication_registration_login_prompt))
             }
         }, onClick = { onClick() })
     }

@@ -1,52 +1,143 @@
 <resources>
-    <string name="app_name">StudentHelper</string>
+    <string name="app_name">Student Helper</string>
 
-    <!-- Login Screen -->
-    <string name="login_header">ავტორიზაცია</string>
-    <string name="login_email_label">ელ.ფოსტა</string>
-    <string name="login_email_placeholder">ელ.ფოსტა</string>
-    <string name="login_password_label">პაროლი</string>
-    <string name="login_password_placeholder">• • • • • • • • •</string>
-    <string name="login_forgot_password">პაროლის აღდგენა</string>
-    <string name="login_login_button">შესვლა</string>
-    <string name="login_social_header">სოციალური ქსელით შესვლა</string>
-    <string name="login_register_prompt">არ გაქვს ანგარიში? შექმენი</string>
+    <!-- Authentication -->
+        <!-- Login Screen -->
+        <string name="authentication_login_header">ავტორიზაცია</string>
+        <string name="authentication_login_email_label">ელ.ფოსტა</string>
+        <string name="authentication_login_email_placeholder">ელ.ფოსტა</string>
+        <string name="authentication_login_password_label">პაროლი</string>
+        <string name="authentication_login_password_placeholder">• • • • • • • • •</string>
+        <string name="authentication_login_forgot_password">პაროლის აღდგენა</string>
+        <string name="authentication_login_login_button">შესვლა</string>
+        <string name="authentication_login_social_header">სოციალური ქსელით შესვლა</string>
+        <string name="authentication_login_register_prompt">არ გაქვს ანგარიში? შექმენი</string>
 
-    <!-- Registration Screen -->
-    <string name="registration_header">რეგისტრაცია</string>
-    <string name="registration_email_label">ელ.ფოსტა</string>
-    <string name="registration_email_placeholder">ელ.ფოსტა</string>
-    <string name="registration_username_label">მომხმარებელი</string>
-    <string name="registration_username_placeholder">მომხმარებელი</string>
-    <string name="registration_password_label">პაროლი</string>
-    <string name="registration_password_placeholder">• • • • • • • • •</string>
-    <string name="registration_register_button">რეგისტრაცია</string>
-    <string name="registration_social_header">სოციალური ქსელით რეგისტრაცია</string>
-    <string name="registration_login_prompt">უკვე მაქვს ანგარიში</string>
+        <!-- Registration Screen -->
+        <string name="authentication_registration_header">რეგისტრაცია</string>
+        <string name="authentication_registration_email_label">ელ.ფოსტა</string>
+        <string name="authentication_registration_email_placeholder">ელ.ფოსტა</string>
+        <string name="authentication_registration_username_label">მომხმარებელი</string>
+        <string name="authentication_registration_username_placeholder">მომხმარებელი</string>
+        <string name="authentication_registration_password_label">პაროლი</string>
+        <string name="authentication_registration_password_placeholder">• • • • • • • • •</string>
+        <string name="authentication_registration_register_button">რეგისტრაცია</string>
+        <string name="authentication_registration_social_header">სოციალური ქსელით რეგისტრაცია</string>
+        <string name="authentication_registration_login_prompt">უკვე მაქვს ანგარიში</string>
 
-    <!-- Registration Verify Email Screen -->
-    <string name="registration_verify_email_header">შეიყვანე კოდი</string>
-    <string name="registration_verify_email_header_text">კოდი გამოგზავნილია:\n</string>
-    <string name="registration_verify_email_code_placeholder">კოდი</string>
-    <string name="registration_verify_email_new_code">ახალი კოდი</string>
-    <string name="registration_verify_email_next_button">გაგრძელება</string>
+        <!-- Registration Verify Email Screen -->
+        <string name="authentication_registration_verify_email_header">შეიყვანე კოდი</string>
+        <string name="authentication_registration_verify_email_header_text">კოდი გამოგზავნილია:\n</string>
+        <string name="authentication_registration_verify_email_code_placeholder">კოდი</string>
+        <string name="authentication_registration_verify_email_new_code">ახალი კოდი</string>
+        <string name="authentication_registration_verify_email_next_button">გაგრძელება</string>
 
-    <!-- Password Recovery Screen -->
-    <string name="password_recovery_enter_email_header">პაროლის აღდგენა</string>
-    <string name="password_recovery_enter_email_header_text">პაროლის აღსადგენად ჩაწერეთ თქვენი ანგარიშის ელ.ფოსტა</string>
-    <string name="password_recovery_enter_email_label">ელ.ფოსტა</string>
-    <string name="password_recovery_enter_email_placeholder">ელ.ფოსტა</string>
-    <string name="password_recovery_enter_email_button">კოდის გაგზავნა</string>
+        <!-- Password Recovery Screen -->
+        <string name="authentication_password_recovery_enter_email_header">პაროლის აღდგენა</string>
+        <string name="authentication_password_recovery_enter_email_header_text">პაროლის აღსადგენად ჩაწერეთ თქვენი ანგარიშის ელ.ფოსტა</string>
+        <string name="authentication_password_recovery_enter_email_label">ელ.ფოსტა</string>
+        <string name="authentication_password_recovery_enter_email_placeholder">ელ.ფოსტა</string>
+        <string name="authentication_password_recovery_enter_email_button">კოდის გაგზავნა</string>
 
-    <!-- Password Recovery Verify Email Screen -->
-    <string name="password_recovery_verify_email_header">შეიყვანე კოდი</string>
-    <string name="password_recovery_verify_email_header_text">კოდი გამოგზავნილია:\n</string>
-    <string name="password_recovery_verify_email_code_placeholder">კოდი</string>
-    <string name="password_recovery_verify_email_new_code">ახალი კოდი</string>
-    <string name="password_recovery_verify_email_next_button">გაგრძელება</string>
-    <string name="password_recovery_enter_password_current_password_label">Password</string>
-    <string name="password_recovery_etner_password_current_password_placeholder">• • • • • • • • •</string>
+        <!-- Password Recovery Verify Email Screen -->
+        <string name="authentication_password_recovery_verify_email_header">შეიყვანე კოდი</string>
+        <string name="authentication_password_recovery_verify_email_header_text">კოდი გამოგზავნილია:\n</string>
+        <string name="authentication_password_recovery_verify_email_code_placeholder">კოდი</string>
+        <string name="authentication_password_recovery_verify_email_new_code">ახალი კოდი</string>
+        <string name="authentication_password_recovery_verify_email_next_button">გაგრძელება</string>
 
-    <!-- Password Recivery Verify Email Screen -->
+        <!-- Password Recovery Verify Email Screen -->
+        <string name="authentication_password_recovery_enter_password_new_password_label">ახალი პაროლი</string>
+        <string name="authentication_password_recovery_enter_password_new_password_placeholder">• • • • • • • • •</string>
+        <string name="authentication_password_recovery_enter_password_confirm_password_label">გაიმეორეთ ახალი პაროლი</string>
+        <string name="authentication_password_recovery_enter_password_confirm_password_placeholder">• • • • • • • • •</string>
+        <string name="authentication_password_recovery_enter_password_change_password">პაროლის შეცვლა</string>
+        <string name="authentication_password_recovery_enter_password_header">შეიყვანეთ ახალი პაროლი</string>
+        <string name="authentication_password_recovery_enter_password_header_text">პაროლი მინიმუმ 8 სომბოლოსგან უნდა შედგებოდეს</string>
+
+    <!-- Authenticated -->
+        <!-- Navigation Bar -->
+        <string name="authenticated_navigationbar_home">მთავარი</string>
+        <string name="authenticated_navigationbar_catalog">კატალოგი</string>
+        <string name="authenticated_navigationbar_schedule">ცხრილი</string>
+        <string name="authenticated_navigationbar_results">შედეგები</string>
+        <string name="authenticated_navigationbar_profile">პროფილი</string>
+
+
+        <!-- Home Screen -->
+
+
+        <!-- Profile Screen -->
+        <string name="authenticated_profile_header_title">პროფილი</string>
+
+        <!-- Settings Screen -->
+        <string name="authenticated_settings_header_title">პარამეტრები</string>
+        <string name="authenticated_settings_account_label">პერსონალიზაცია</string>
+        <string name="authenticated_settings_item_account">მომხმარებელი</string>
+        <string name="authenticated_settings_item_notifications">შეტყობინებები</string>
+        <string name="authenticated_settings_item_link_university">უნივერსიტეტის მიბმა</string>
+
+        <!-- Account Settings Screen -->
+        <string name="authenticated_settings_account_header_title">მომხმარებელი</string>
+        <string name="authenticated_settings_account_account_label">პირადი მონაცემები</string>
+        <string name="authenticated_settings_account_account_item_username">სახელი</string>
+        <string name="authenticated_settings_account_account_item_email">ელ.ფოსტა</string>
+        <string name="authenticated_settings_account_account_item_phone">ტელეფონის ნომერი</string>
+        <string name="authenticated_settings_account_security_label">უსაფრთხოება</string>
+        <string name="authenticated_settings_account_security_item_password">პაროლი</string>
+        <string name="authenticated_settings_account_security_item_2fa">პასკოდით შესვლა</string>
+        <string name="authenticated_settings_account_management_label">ანგარიშის მართვა</string>
+        <string name="authenticated_settings_account_management_item_delete">ანგარიშის წაშლა</string>
+        <string name="authenticated_settings_account_management_item_signout">გასვლა</string>
+
+        <!-- Edit Email Screen1-->
+        <string name="authenticated_settings_account_edit_email_verification_header">ელ.ფოსტა</string>
+        <string name="authenticated_settings_account_edit_email_verification_header_label">ელ.ფოსტის ვერიფიკაცია</string>
+        <string name="authenticated_settings_account_edit_email_verification_header_text">ელ.ფოსტის შეცვლისთვის საჭიროა მიმდინარე, %1$s-ის ვერიფიკაცია.</string>
+        <string name="authenticated_settings_account_edit_email_verification_send_code_button">კოდის გაგზავნა</string>
+        <string name="authenticated_settings_account_edit_email_verification_warning">ელ.ფოსტის შეცვლა შესაძლებელია</string>
+        <string name="authenticated_settings_account_edit_email_verification_warning2">30 დღეში ერთხელ!</string>
+
+
+        <!-- Edit Email Verify Screen-->
+        <string name="authenticated_settings_account_edit_email_verification_verify_email_header">შეიყვანე კოდი</string>
+        <string name="authenticated_settings_account_edit_email_verification_verify_email_header_text">კოდი გამოგზავნილია:\n</string>
+        <string name="authenticated_settings_account_edit_email_verification_verify_email_code_placeholder">კოდი</string>
+        <string name="authenticated_settings_account_edit_email_verification_email_new_code">ახალი კოდი</string>
+        <string name="authenticated_settings_account_edit_email_verification_email_next_button">გაგრძელება</string>
+
+
+        <!-- Edit Email Screen2-->
+        <string name="authenticated_settings_account_edit_email_header">ელ.ფოსტა</string>
+        <string name="authenticated_settings_account_edit_email_new_email_label">ახალი ელ.ფოსტა</string>
+        <string name="authenticated_settings_account_edit_email_new_email_placeholder">ახალი ელ.ფოსტა</string>
+        <string name="authenticated_settings_account_edit_email_new_email_send_code">კოდის გაგზავნა</string>
+        <string name="authenticated_settings_account_edit_email_new_email_verify_label">კოდი</string>
+        <string name="authenticated_settings_account_edit_email_new_email_verify_placeholder">კოდი</string>
+        <string name="authenticated_settings_account_edit_email_new_email_resend_code">ახალი კოდი</string>
+        <string name="authenticated_settings_account_edit_email_new_email_change_email_button">ელ.ფოსტის შეცვლა</string>
+        <string name="authenticated_settings_account_edit_email_new_email_verify_button">ვერიფიკაცია</string>
+
+        <!-- Edit Password Screen-->
+        <string name="authenticated_settings_account_edit_password_header">მომხმარებელი</string>
+        <string name="authenticated_settings_account_edit_password_current_password_label">მიმდინარე პაროლი</string>
+        <string name="authenticated_settings_account_edit_password_current_password_placeholder">• • • • • • • • •</string>
+        <string name="authenticated_settings_account_edit_password_new_password_label">ახალი პაროლი</string>
+        <string name="authenticated_settings_account_edit_password_new_password_placeholder">• • • • • • • • •</string>
+        <string name="authenticated_settings_account_edit_password_confirm_new_password_label">გაიმორე მიმდინარე პაროლი</string>
+        <string name="authenticated_settings_account_edit_password_confirm_new_password_placeholder">• • • • • • • • •</string>
+        <string name="authenticated_settings_account_edit_password_change_password_button">პაროლის შეცვლა</string>
+
+        <!-- Notification Screen-->
+        <string name="authenticated_settings_notifications_header">შეტყობინებები</string>
+        <string name="authenticated_settings_notifications_item_general_label">მთავარი</string>
+        <string name="authenticated_settings_notifications_item_general_daily_lesson_reminder_placeeholder">ლექციების შეხსენება</string>
+
+        <!-- Connections Screen-->
+        <string name="authenticated_settings_connecions_header">უნივერსიტეტის მიბმა</string>
+        <string name="authenticated_settings_connecions_bottom_sheet_search_placeholder">ძიება</string>
+        <string name="authenticated_settings_connecions_bottom_sheet_search_notihng_found_text">უნივერსიტეტი ვერ მოიძებნა</string>
+    <string name="authenticated_home_header">მთავარი</string>
+
 
 </resources>

@@ -2,8 +2,8 @@ package com.darkindustry.studenthelper.navigation
 
 import android.os.Build
 import androidx.annotation.RequiresApi
-import com.darkindustry.studenthelper.ui.authenticated.results.ResultsScreen
-import androidx.compose.animation.core.LinearEasing
+import androidx.annotation.RequiresExtension
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -11,7 +11,6 @@ import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.runtime.Composable
-import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
@@ -21,7 +20,6 @@ import com.darkindustry.studenthelper.logic.utils.Utils.Companion.GLOBAL_TRANSIT
 import com.darkindustry.studenthelper.ui.authenticated.catalog.CatalogScreen
 import com.darkindustry.studenthelper.ui.authenticated.home.HomeScreen
 import com.darkindustry.studenthelper.ui.authenticated.profile.ProfileScreen
-import com.darkindustry.studenthelper.ui.authenticated.profile.ProfileViewModel
 import com.darkindustry.studenthelper.ui.authenticated.profile.settings.SettingsScreen
 import com.darkindustry.studenthelper.ui.authenticated.profile.settings.account.AccountEditEmail
 import com.darkindustry.studenthelper.ui.authenticated.profile.settings.account.AccountEditEmailVerification
@@ -30,6 +28,7 @@ import com.darkindustry.studenthelper.ui.authenticated.profile.settings.account.
 import com.darkindustry.studenthelper.ui.authenticated.profile.settings.account.AccountSettings
 import com.darkindustry.studenthelper.ui.authenticated.profile.settings.connection.ConnectionScreen
 import com.darkindustry.studenthelper.ui.authenticated.profile.settings.notifications.NotificationScreen
+import com.darkindustry.studenthelper.ui.authenticated.results.ResultsScreen
 import com.darkindustry.studenthelper.ui.authenticated.schedule.ScheduleScreen
 import com.darkindustry.studenthelper.ui.authentication.login.LoginScreen
 import com.darkindustry.studenthelper.ui.authentication.login.passwordRecovery.PasswordRecoveryContentMain
@@ -41,11 +40,12 @@ import com.darkindustry.studenthelper.ui.authentication.registration.Registratio
 sealed class NavigationRoute(open val route: String) {
     sealed class Authentication(route: String) : NavigationRoute(route) {
         data object Login : Authentication("auth/login")
-        data object Registration : Authentication("auth/register"){
-            data object VerifyEmail : Authentication("auth/register/verify_email/{email}/{username}/{password}")
+        data object Registration : Authentication("auth/register") {
+            data object VerifyEmail :
+                Authentication("auth/register/verify_email/{email}/{username}/{password}")
         }
 
-        data object PasswordRecovery : Authentication("auth/recover_password"){
+        data object PasswordRecovery : Authentication("auth/recover_password") {
             data object VerifyEmail : Authentication("auth/recover_password/verify_email/{email}")
             data object PasswordEnter : Authentication("auth/recover_password/new_password/{email}")
         }
@@ -63,20 +63,33 @@ sealed class NavigationRoute(open val route: String) {
 
             data object Account : Settings("authenticated/settings/account") {
                 sealed class AccountInformation(val route: String) {
-                    data object VerifyEmail : AccountInformation("authenticated/settings/account/verify_email")
-                    data object EditUsername : AccountInformation("authenticated/settings/account/edit_username")
-                    data object EditEmail : AccountInformation("authenticated/settings/account/edit_email")
-                    data object EditPhone : AccountInformation("authenticated/settings/account/edit_phone")
+                    data object VerifyEmail :
+                        AccountInformation("authenticated/settings/account/verify_email")
+
+                    data object EditUsername :
+                        AccountInformation("authenticated/settings/account/edit_username")
+
+                    data object EditEmail :
+                        AccountInformation("authenticated/settings/account/edit_email")
+
+                    data object EditPhone :
+                        AccountInformation("authenticated/settings/account/edit_phone")
                 }
 
                 sealed class Security(val route: String) {
-                    data object ChangePassword : Security("authenticated/settings/account/security/edit_password")
-                    data object TwoFactor : Security("authenticated/settings/account/security/two_factor")
+                    data object ChangePassword :
+                        Security("authenticated/settings/account/security/edit_password")
+
+                    data object TwoFactor :
+                        Security("authenticated/settings/account/security/two_factor")
                 }
 
                 sealed class AccountManagement(val route: String) {
-                    data object DeleteAccount : AccountManagement("authenticated/settings/account/delete_account")
-                    data object SignOut : AccountManagement("authenticated/settings/account/sign_out")
+                    data object DeleteAccount :
+                        AccountManagement("authenticated/settings/account/delete_account")
+
+                    data object SignOut :
+                        AccountManagement("authenticated/settings/account/sign_out")
                 }
             }
 
@@ -88,16 +101,17 @@ sealed class NavigationRoute(open val route: String) {
     }
 }
 
-val Easing = LinearEasing
+val Easing = FastOutSlowInEasing
 
 @Composable
 fun AuthenticationNavGraph(navHostController: NavHostController) {
     NavHost(
-        navController = navHostController, startDestination = NavigationRoute.Authentication.Login.route
+        navController = navHostController,
+        startDestination = NavigationRoute.Authentication.Login.route
     ) {
         composable(
             route = NavigationRoute.Authentication.Login.route,
-        ){
+        ) {
             LoginScreen(navController = navHostController)
         }
 
@@ -116,7 +130,8 @@ fun AuthenticationNavGraph(navHostController: NavHostController) {
             val username = backStackEntry.arguments?.getString("username")
             val password = backStackEntry.arguments?.getString("password")
             if (email != null && username != null && password != null) {
-                RegistrationVerifyEmail(navController = navHostController,
+                RegistrationVerifyEmail(
+                    navController = navHostController,
                     email = email,
                     username = username,
                     password = password
@@ -227,10 +242,10 @@ fun AuthenticationNavGraph(navHostController: NavHostController) {
     }
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun AuthenticatedNavGraph(
-    profileViewModel: ProfileViewModel = hiltViewModel(),
     navHostController: NavHostController,
     paddingValues: PaddingValues,
     dbUsername: String,
@@ -240,11 +255,12 @@ fun AuthenticatedNavGraph(
     dbUniversitySchedule: Map<String, List<Map<String, String>>>?,
     dbUniversityGrades: List<Map<String, Any>>,
     dbStudentStats: Map<String, Any>,
-    dbUniversityLinked: String
+    dbUniversityLinked: String,
 ) {
 
     NavHost(
-        navController = navHostController, startDestination = NavigationRoute.Authenticated.Profile.route
+        navController = navHostController,
+        startDestination = NavigationRoute.Authenticated.Profile.route
     ) {
         // Navigation Bar
         composable(NavigationRoute.Authenticated.Home.route) {
@@ -285,12 +301,36 @@ fun AuthenticatedNavGraph(
         // Profile and its subitems
         composable(
             NavigationRoute.Authenticated.Profile.route,
+            enterTransition = {
+                fadeIn(
+                    animationSpec = tween(
+                        durationMillis = GLOBAL_TRANSITION_TIME, easing = Easing
+                    )
+                )
+            },
+            exitTransition = {
+                fadeOut(
+                    animationSpec = tween(
+                        durationMillis = GLOBAL_TRANSITION_TIME, easing = Easing
+                    )
+                )
+            },
             popExitTransition = {
                 slideOutHorizontally(
                     targetOffsetX = { it },
-                    animationSpec = tween(durationMillis = GLOBAL_TRANSITION_TIME, easing = Easing)
+                    animationSpec = tween(
+                        durationMillis = GLOBAL_TRANSITION_TIME, easing = Easing
+                    )
                 )
             },
+            popEnterTransition = {
+                slideInHorizontally(
+                    initialOffsetX = { -it },
+                    animationSpec = tween(
+                        durationMillis = GLOBAL_TRANSITION_TIME, easing = Easing
+                    )
+                )
+            }
         ) {
             ProfileScreen(
                 navController = navHostController,
@@ -406,9 +446,9 @@ fun AuthenticatedNavGraph(
                 )
             },
         ) {
-           ConnectionScreen(
-               navController = navHostController
-           )
+            ConnectionScreen(
+                navController = navHostController
+            )
         }
 
         composable(
@@ -478,7 +518,7 @@ fun AuthenticatedNavGraph(
                     )
                 )
             },
-        ){
+        ) {
             AccountEditUsername(
                 navController = navHostController,
                 dbUsername = dbUsername,
@@ -515,7 +555,7 @@ fun AuthenticatedNavGraph(
                     )
                 )
             },
-        ){
+        ) {
             AccountEditEmail(
                 navController = navHostController,
                 dbEmail = dbEmail,
@@ -552,7 +592,7 @@ fun AuthenticatedNavGraph(
                     )
                 )
             },
-        ){
+        ) {
             AccountEditEmailVerification(
                 navController = navHostController,
                 dbEmail = dbEmail,
@@ -589,12 +629,11 @@ fun AuthenticatedNavGraph(
                     )
                 )
             },
-        ){
+        ) {
             AccountEditPassword(
                 navController = navHostController,
             )
         }
-
     }
 }
 

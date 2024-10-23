@@ -46,19 +46,18 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.darkindustry.studenthelper.R
-import com.darkindustry.studenthelper.navigation.NavigationRoute
 import com.darkindustry.studenthelper.logic.utils.MessageBox
 import com.darkindustry.studenthelper.logic.utils.Utils
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationButton
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationTextField
-import com.darkindustry.studenthelper.logic.utils.Utils.Companion.CustomHeader
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.GLOBAL_ELEVATION
+import com.darkindustry.studenthelper.navigation.NavigationRoute
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun LoginScreen(
     loginViewModel: LoginViewModel = hiltViewModel(),
-    navController: NavController
+    navController: NavController,
 ) {
     rememberSystemUiController().apply {
         setStatusBarColor(color = MaterialTheme.colorScheme.background)
@@ -103,7 +102,7 @@ private fun LoginMainForm(
     email: String,
     password: String,
     showPassword: Boolean,
-    focusManager: FocusManager
+    focusManager: FocusManager,
 ) {
     Column(
         modifier = Modifier
@@ -117,10 +116,10 @@ private fun LoginMainForm(
         LoginHeader()
         Spacer(modifier = Modifier.weight(0.4f))
         ApplicationTextField(
-            topText = stringResource(id = R.string.login_email_label),
+            topText = stringResource(id = R.string.authentication_login_email_label),
             value = email,
             onValueChange = loginViewModel::onEmailChange,
-            placeholderText = stringResource(id = R.string.login_email_placeholder),
+            placeholderText = stringResource(id = R.string.authentication_login_email_placeholder),
             leadingIcon = {
                 Image(
                     painter = painterResource(id = R.drawable.ic_envelope),
@@ -132,10 +131,10 @@ private fun LoginMainForm(
         )
         Spacer(modifier = Modifier.weight(0.1f))
         ApplicationTextField(
-            topText = stringResource(id = R.string.login_password_label),
+            topText = stringResource(id = R.string.authentication_login_password_label),
             value = password,
             onValueChange = loginViewModel::onPasswordChange,
-            placeholderText = stringResource(id = R.string.login_password_placeholder),
+            placeholderText = stringResource(id = R.string.authentication_login_password_placeholder),
             leadingIcon = {
                 Image(
                     painter = painterResource(id = R.drawable.ic_lock),
@@ -159,7 +158,11 @@ private fun LoginMainForm(
                         } else {
                             "Show password"
                         },
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f)),
+                        colorFilter = ColorFilter.tint(
+                            MaterialTheme.colorScheme.secondary.copy(
+                                alpha = 0.67f
+                            )
+                        ),
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -172,11 +175,18 @@ private fun LoginMainForm(
         )
         Spacer(modifier = Modifier.weight(0.15f))
         LoginForgotPasswordLink {
-            navController.navigate(NavigationRoute.Authentication.PasswordRecovery.route)
+            navController.navigate(NavigationRoute.Authentication.PasswordRecovery.route) {
+                launchSingleTop = true
+                popUpTo(NavigationRoute.Authentication.PasswordRecovery.route) {
+                    saveState = true
+                }
+                restoreState = true
+            }
+
         }
         Spacer(modifier = Modifier.weight(0.15f))
         ApplicationButton(
-            text = stringResource(id = R.string.login_login_button),
+            text = stringResource(id = R.string.authentication_login_login_button),
             onClick = {
                 focusManager.clearFocus()
                 loginViewModel.authenticateUser(
@@ -189,7 +199,15 @@ private fun LoginMainForm(
         Spacer(modifier = Modifier.weight(0.2f))
         SocialLoginOptions()
         Spacer(modifier = Modifier.weight(1f))
-        RegisterPrompt { navController.navigate(NavigationRoute.Authentication.Registration.route) }
+        RegisterPrompt {
+            navController.navigate(NavigationRoute.Authentication.Registration.route) {
+                launchSingleTop = true
+                popUpTo(NavigationRoute.Authentication.Registration.route) {
+                    saveState = true
+                }
+                restoreState = true
+            }
+        }
         Spacer(modifier = Modifier.height(32.dp))
     }
 }
@@ -202,7 +220,7 @@ private fun LoginHeader() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(id = R.string.login_header),
+            text = stringResource(id = R.string.authentication_login_header),
             style = MaterialTheme.typography.displayMedium.copy(
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -217,7 +235,8 @@ private fun LoginForgotPasswordLink(onClick: () -> Unit) {
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.End
     ) {
-        ClickableText(text = buildAnnotatedString { append(stringResource(id = R.string.login_forgot_password)) },
+        ClickableText(
+            text = buildAnnotatedString { append(stringResource(id = R.string.authentication_login_forgot_password)) },
             onClick = { onClick() },
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f)
@@ -234,7 +253,7 @@ private fun SocialLoginHeader() {
         horizontalArrangement = Arrangement.Center
     ) {
         Text(
-            text = stringResource(id = R.string.login_social_header),
+            text = stringResource(id = R.string.authentication_login_social_header),
             style = MaterialTheme.typography.bodyLarge.copy(
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f),
                 textAlign = TextAlign.Center
@@ -303,7 +322,7 @@ private fun RegisterPrompt(onClick: () -> Unit) {
                     letterSpacing = MaterialTheme.typography.bodyLarge.letterSpacing,
                 )
             ) {
-                append(stringResource(R.string.login_register_prompt))
+                append(stringResource(R.string.authentication_login_register_prompt))
             }
             addStyle(
                 style = SpanStyle(color = MaterialTheme.colorScheme.primary),

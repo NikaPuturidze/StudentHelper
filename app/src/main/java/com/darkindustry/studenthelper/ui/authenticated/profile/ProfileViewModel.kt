@@ -1,5 +1,7 @@
 package com.darkindustry.studenthelper.ui.authenticated.profile
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.lifecycle.viewModelScope
 import com.darkindustry.studenthelper.logic.data.ApplicationRepository
 import com.darkindustry.studenthelper.logic.data.ApplicationViewModel
@@ -92,7 +94,6 @@ class ProfileViewModel @Inject constructor(
             applicationRepository.verifyCode(email, userEnteredVerificationCode).fold(
                 onSuccess = {
                     setVerificationStatus(true)
-                    setInitEmailVerified(true)
                     onSuccess()
                 },
                 onFailure = { exception ->
@@ -116,7 +117,8 @@ class ProfileViewModel @Inject constructor(
 
             if (!available) {
                 setMessage(
-                    "თქვენ ახლახანს შეცვალეთ $changeType, შეცვლა შესაძლებელი იქნება $daysLeft დღეში.", MessageType.INFO
+                    "თქვენ ახლახანს შეცვალეთ $changeType, შეცვლა შესაძლებელი იქნება $daysLeft დღეში.",
+                    MessageType.INFO
                 )
             }
             onSuccess(available, daysLeft)
@@ -134,21 +136,27 @@ class ProfileViewModel @Inject constructor(
                 currentPassword.isNotEmpty() && newPassword.isNotEmpty() && confirmNewPassword.isEmpty() -> {
                     "გთხოვთ გაიმეოროთ ახალი პაროლი შესაბამის ველში."
                 }
+
                 currentPassword.isEmpty() && newPassword.isNotEmpty() && confirmNewPassword.isNotEmpty() -> {
                     "გთხოვთ შეიყვანოთ მიმდინარე პაროლი."
                 }
+
                 currentPassword.isNotEmpty() && newPassword.isEmpty() && confirmNewPassword.isNotEmpty() -> {
                     "გთხოვთ შეიყვანოთ ახალი პაროლი."
                 }
+
                 currentPassword.isEmpty() && newPassword.isEmpty() && confirmNewPassword.isNotEmpty() -> {
                     "გთხოვთ შეიყვანოთ მიმდინარე და ახალი პაროლები."
                 }
+
                 currentPassword.isNotEmpty() && newPassword.isEmpty() && confirmNewPassword.isEmpty() -> {
                     "გთხოვთ შეიყვანეთ და გაიმეორეთ ახალი პაროლი."
                 }
+
                 currentPassword.isEmpty() && newPassword.isEmpty() && confirmNewPassword.isEmpty() -> {
                     "გთხოვთ შეავსეთ ყველა ველი."
                 }
+
                 else -> ""
             }
 
@@ -184,6 +192,44 @@ class ProfileViewModel @Inject constructor(
             }
         } else {
             onSuccess(false, "მომხმარებელი ვერ მოიძებნა.")
+        }
+    }
+
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+    fun checkEmailtoChange(
+        newEmail: String,
+        onSuccess: () -> Unit = {},
+        onFailure: () -> Unit = {}
+    ) {
+        doesUserExist(newEmail, applicationRepository) { exists ->
+            if (!exists) {
+                onSuccess()
+            } else {
+                setMessage(
+                    "ეს ელ.ფოსტა უკვე დარეგისტრირებულია სხვა მომხმარებლის მიერ.",
+                    MessageType.ERROR
+                )
+                onFailure()
+            }
+        }
+    }
+
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+    fun changeCurrentUserEmail(
+        newEmail: String,
+        onSuccess: () -> Unit = {},
+        onFailure: () -> Unit = {}
+    ) {
+        viewModelScope.launch(Dispatchers.Main) {
+            applicationRepository.changeCurrentUserEmail(newEmail).fold(
+                onSuccess = {
+                    onSuccess()
+                },
+                onFailure = { exception ->
+                    setMessage("${exception.message}", MessageType.ERROR)
+                    onFailure()
+                }
+            )
         }
     }
 

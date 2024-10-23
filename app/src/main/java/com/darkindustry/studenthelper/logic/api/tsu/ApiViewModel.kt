@@ -38,7 +38,16 @@ class ApiViewModel @Inject constructor(
         userRef: DocumentReference = FirebaseFirestore.getInstance().collection("users")
             .document(FirebaseAuth.getInstance().currentUser?.uid ?: ""),
         fieldPath: String, newValue: Any,
+        onSuccess: () -> Unit = {},
+        onFailure: () -> Unit = {},
     ) {
-        apiRepository.executeBatchUpdate(userRef, fieldPath, newValue)
+        apiRepository.executeBatchUpdate(userRef, fieldPath, newValue,
+            onSuccess = {
+                onSuccess()
+            },
+            onFailure = {
+                onFailure()
+            }
+        )
     }
 }

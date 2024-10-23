@@ -12,8 +12,13 @@ import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 open class ApplicationViewModel @Inject constructor() : ViewModel() {
-    // State Flow Properties
+    // Error handling properties
+    private val messageQueue = mutableListOf<Pair<String, MessageType>>()
+    private var isMessageShowing = false
+    private var lastMessage: String? = null
+    private var lastMessageTimestamp: Long = 0
 
+    // State Flow Properties
     private val emailMutable = MutableStateFlow("")
     val email: StateFlow<String> get() = emailMutable
 
@@ -55,9 +60,6 @@ open class ApplicationViewModel @Inject constructor() : ViewModel() {
     private val codeVisibleMutable = MutableStateFlow(false)
     val codeVisible: StateFlow<Boolean> get() = codeVisibleMutable
 
-    private val showCodeEnterFieldMutable = MutableStateFlow(false)
-    val showCodeEnterField: StateFlow<Boolean> get() = showCodeEnterFieldMutable
-
     private val verificationStatusMutable = MutableStateFlow(false)
     val verificationStatus: StateFlow<Boolean> get() = verificationStatusMutable
 
@@ -70,9 +72,6 @@ open class ApplicationViewModel @Inject constructor() : ViewModel() {
 
     private val initEmailVerifiedMutable = MutableStateFlow(false)
     val initEmailVerified: StateFlow<Boolean> get() = initEmailVerifiedMutable
-
-    private val lastUsernameChangeMutable = MutableStateFlow(false)
-    val valueChangedAt: StateFlow<Boolean> get() = lastUsernameChangeMutable
 
     // Methods for State Management
     fun setSessionId(sessionId: String) {
@@ -93,10 +92,6 @@ open class ApplicationViewModel @Inject constructor() : ViewModel() {
 
     fun setInitEmailVerified(emailVerified: Boolean) {
         initEmailVerifiedMutable.value = emailVerified
-    }
-
-    fun setShowCodeEnterField(showCodeEnterField: Boolean) {
-        showCodeEnterFieldMutable.value = showCodeEnterField
     }
 
     fun onEmailClear() {
@@ -151,17 +146,42 @@ open class ApplicationViewModel @Inject constructor() : ViewModel() {
         userEnteredVerificationCodeMutable.value = newCode
     }
 
-    // Error Handling
+    // Message Handling
     fun setMessage(message: String, messageType: MessageType) {
+        messageQueue.add(Pair(message, messageType))
+        processQueue()
+    }
+
+    // Message Processing
+    private fun processQueue() {
+        if (isMessageShowing || messageQueue.isEmpty()) return
+
+        val (message, messageType) = messageQueue.removeAt(0)
+
+        val currentTime = System.currentTimeMillis()
+        if (message == lastMessage && (currentTime - lastMessageTimestamp) < 7500) {
+            processQueue()
+            return
+        }
+
+        lastMessage = message
+        lastMessageTimestamp = currentTime
+
         messageTypeMutable.value = messageType
+        isMessageShowing = true
+
         viewModelScope.launch {
             messageMutable.value = message
-            delay(120)
+            delay(200)
             messageStateMutable.value = true
             delay(3000)
             messageStateMutable.value = false
-            delay(120)
+            delay(200)
             messageMutable.value = ""
+
+            isMessageShowing = false
+            delay(200)
+            processQueue()
         }
     }
 
@@ -169,7 +189,7 @@ open class ApplicationViewModel @Inject constructor() : ViewModel() {
     protected fun doesUserExist(
         email: String,
         applicationRepository: ApplicationRepository,
-        onResult: (Boolean) -> Unit
+        onResult: (Boolean) -> Unit,
     ) {
         viewModelScope.launch(Dispatchers.Main) {
             applicationRepository.doesUserExistByEmail(email).fold(

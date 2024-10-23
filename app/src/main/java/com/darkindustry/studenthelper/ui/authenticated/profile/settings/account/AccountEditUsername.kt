@@ -36,6 +36,7 @@ import com.darkindustry.studenthelper.logic.utils.Utils
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationTextField
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.CustomAlertDialog
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.CustomHeader
+import com.darkindustry.studenthelper.navigation.NavigationRoute
 import com.darkindustry.studenthelper.ui.authenticated.profile.ProfileViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 import com.google.firebase.Timestamp
@@ -48,7 +49,7 @@ fun AccountEditUsername(
     dbUsername: String,
 ) {
     rememberSystemUiController().apply {
-        setStatusBarColor(color = MaterialTheme.colorScheme.background)
+        setStatusBarColor(color = MaterialTheme.colorScheme.onBackground)
         setNavigationBarColor(color = MaterialTheme.colorScheme.background)
     }
 
@@ -69,46 +70,76 @@ fun AccountEditUsername(
 
     if (showBackDialog) {
         CustomAlertDialog(
-            title = "Unsaved Changes",
-            message = "You have unsaved changes. Are you sure you want to leave without saving them?",
-            confirmButtonText = "Save and exit",
-            cancelButtonText = "Discard",
+            title = "შეუნახავი ცვლილებები",
+            message = "გასვლის შემთხვევაში, ყოველგვარი ცვლილება დაიკარგება, დარწმუნებული ხარ რომ გასვლა გსურს?",
+            confirmButtonText = "შენახვა და გასვლა",
+            cancelButtonText = "გასვლა",
             onConfirm = {
                 focusManager.clearFocus()
-                apiViewModel.updateUserData(fieldPath = "username", newValue = newUsername)
                 apiViewModel.updateUserData(
-                    fieldPath = "usernameChangedAt",
-                    newValue = Timestamp.now()
+                    fieldPath = "username",
+                    newValue = newUsername,
+                    onSuccess = {
+                        apiViewModel.updateUserData(
+                            fieldPath = "usernameChangedAt",
+                            newValue = Timestamp.now(),
+                            onSuccess = {
+                                showBackDialog = false
+                                isSaved = true
+                                navController.popBackStack(
+                                    route = NavigationRoute.Authenticated.Settings.Account.route,
+                                    inclusive = false
+                                )
+                            }
+                        )
+                    }
                 )
-                isSaved = true
-                navController.popBackStack()
             },
             onCancel = {
                 focusManager.clearFocus()
-                navController.popBackStack()
+                showBackDialog = false
+                navController.popBackStack(
+                    route = NavigationRoute.Authenticated.Settings.Account.route,
+                    inclusive = false
+                )
             }
         )
     }
 
     if (showConfirmDialog) {
         CustomAlertDialog(
-            title = "Confirm Changes",
-            message = "Are you sure you want to save these changes? You'll be unable to change your username again for the next 14 days",
-            confirmButtonText = "Confirm",
-            cancelButtonText = "Discard",
+            title = "დარწმუნებული ხარ?",
+            message = "მომხმარებლის სახელის ცვლილების შემთხვევაში, მომდევნო ცვლილება შესაძლებელი იქნება მხოლოდ 14 დღეში!",
+            confirmButtonText = "დადასტურება",
+            cancelButtonText = "გამოსვლა",
             onConfirm = {
                 focusManager.clearFocus()
-                apiViewModel.updateUserData(fieldPath = "username", newValue = newUsername)
                 apiViewModel.updateUserData(
-                    fieldPath = "usernameChangedAt",
-                    newValue = Timestamp.now()
+                    fieldPath = "username",
+                    newValue = newUsername,
+                    onSuccess = {
+                        apiViewModel.updateUserData(
+                            fieldPath = "usernameChangedAt",
+                            newValue = Timestamp.now(),
+                            onSuccess = {
+                                showBackDialog = false
+                                isSaved = true
+                                navController.popBackStack(
+                                    route = NavigationRoute.Authenticated.Settings.Account.route,
+                                    inclusive = false
+                                )
+                            }
+                        )
+                    }
                 )
-                isSaved = true
-                navController.popBackStack()
             },
             onCancel = {
                 focusManager.clearFocus()
-                navController.popBackStack()
+                showConfirmDialog = false
+                navController.popBackStack(
+                    route = NavigationRoute.Authenticated.Settings.Account.route,
+                    inclusive = false
+                )
             }
         )
     }
@@ -160,14 +191,7 @@ fun AccountEditUsernameForm(
 ) {
     CustomHeader(
         title = "Username",
-        left = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_arrow_left),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(32.dp)
-            )
-        },
+        leftIcon = R.drawable.ic_arrow_left,
         onLeftClick = {
             if (isSaved || newUsername == initialUsername) {
                 navController.popBackStack()
@@ -175,16 +199,7 @@ fun AccountEditUsernameForm(
                 showBackDialog(true)
             }
         },
-        right = {
-            if (newUsername != initialUsername && newUsername.isNotEmpty() && newUsername.length >= 4 && !isSaved) {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_checkmark),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.secondary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
-        },
+        rightIcon = R.drawable.ic_checkmark,
         onRightClick = {
             showConfirmDialog(true)
         }

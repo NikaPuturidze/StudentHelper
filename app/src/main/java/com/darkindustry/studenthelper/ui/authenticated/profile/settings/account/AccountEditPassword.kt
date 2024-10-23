@@ -8,7 +8,6 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -24,6 +23,7 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
@@ -42,10 +42,10 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun AccountEditPassword(
-    profileViewModel: ProfileViewModel = hiltViewModel(), navController: NavHostController
+    profileViewModel: ProfileViewModel = hiltViewModel(), navController: NavHostController,
 ) {
     rememberSystemUiController().apply {
-        setStatusBarColor(color = MaterialTheme.colorScheme.background)
+        setStatusBarColor(color = MaterialTheme.colorScheme.onBackground)
         setNavigationBarColor(color = MaterialTheme.colorScheme.background)
     }
 
@@ -64,10 +64,11 @@ fun AccountEditPassword(
     val focusManager = LocalFocusManager.current
 
     if (showBackDialog) {
-        CustomAlertDialog(title = "Unsaved Changes",
-            message = "You have unsaved changes. Are you sure you want to leave without saving them?",
-            confirmButtonText = "Exit without changes",
-            cancelButtonText = "Continue editing",
+        CustomAlertDialog(
+            title = "შეუნახავი ცვლილებები",
+            message = "გასვლის შემთხვევაში, ყოველგვარი ცვლილება დაიკარგება, დარწმუნებული ხარ რომ გასვლა გსურს?",
+            confirmButtonText = "გასვლა",
+            cancelButtonText = "გაგრძელება",
             onConfirm = {
                 focusManager.clearFocus()
                 navController.popBackStack()
@@ -81,20 +82,16 @@ fun AccountEditPassword(
     Column(
         Modifier.fillMaxHeight()
     ) {
-        CustomHeader(title = "Username", left = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_arrow_left),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(32.dp)
-            )
-        }, onLeftClick = {
-            if (currentPassword.isEmpty() && newPassword.isEmpty() && confirmNewPassword.isEmpty() || passwordChanged) {
-                navController.popBackStack()
-            } else {
-                showBackDialog = true
-            }
-        })
+        CustomHeader(
+            title = stringResource(R.string.authenticated_settings_account_edit_password_header),
+            leftIcon = R.drawable.ic_arrow_left,
+            onLeftClick = {
+                if (currentPassword.isEmpty() && newPassword.isEmpty() && confirmNewPassword.isEmpty() || passwordChanged) {
+                    navController.popBackStack()
+                } else {
+                    showBackDialog = true
+                }
+            })
 
         Column(
             modifier = Modifier
@@ -105,10 +102,10 @@ fun AccountEditPassword(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             ApplicationTextField(
-                topText = "Current password",
+                topText = stringResource(R.string.authenticated_settings_account_edit_password_current_password_label),
                 value = currentPassword,
                 onValueChange = profileViewModel::onOldPasswordChange,
-                placeholderText = "• • • • • • • • •",
+                placeholderText = stringResource(R.string.authenticated_settings_account_edit_password_current_password_placeholder),
                 leadingIcon = {
                     Image(
                         painter = painterResource(id = R.drawable.ic_lock),
@@ -132,7 +129,11 @@ fun AccountEditPassword(
                             } else {
                                 "Show password"
                             },
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f)),
+                            colorFilter = ColorFilter.tint(
+                                MaterialTheme.colorScheme.secondary.copy(
+                                    alpha = 0.67f
+                                )
+                            ),
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -146,10 +147,10 @@ fun AccountEditPassword(
             )
 
             ApplicationTextField(
-                topText = "New Password",
+                topText = stringResource(R.string.authenticated_settings_account_edit_password_new_password_label),
                 value = newPassword,
                 onValueChange = profileViewModel::onNewPasswordChange,
-                placeholderText = "• • • • • • • • •",
+                placeholderText = stringResource(R.string.authenticated_settings_account_edit_password_new_password_placeholder),
                 leadingIcon = {
                     Image(
                         painter = painterResource(id = R.drawable.ic_lock),
@@ -173,7 +174,11 @@ fun AccountEditPassword(
                             } else {
                                 "Show password"
                             },
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f)),
+                            colorFilter = ColorFilter.tint(
+                                MaterialTheme.colorScheme.secondary.copy(
+                                    alpha = 0.67f
+                                )
+                            ),
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -187,10 +192,10 @@ fun AccountEditPassword(
             )
 
             ApplicationTextField(
-                topText = "Confirm new password",
+                topText = stringResource(R.string.authenticated_settings_account_edit_password_confirm_new_password_label),
                 value = confirmNewPassword,
                 onValueChange = profileViewModel::onConfirmNewPasswordChange,
-                placeholderText = "• • • • • • • • •",
+                placeholderText = stringResource(R.string.authenticated_settings_account_edit_password_confirm_new_password_placeholder),
                 leadingIcon = {
                     Image(
                         painter = painterResource(id = R.drawable.ic_lock),
@@ -214,7 +219,11 @@ fun AccountEditPassword(
                             } else {
                                 "Show password"
                             },
-                            colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f)),
+                            colorFilter = ColorFilter.tint(
+                                MaterialTheme.colorScheme.secondary.copy(
+                                    alpha = 0.67f
+                                )
+                            ),
                             modifier = Modifier.size(22.dp)
                         )
                     }
@@ -229,24 +238,26 @@ fun AccountEditPassword(
                     .padding(bottom = 12.dp)
             )
 
-            ApplicationButton(text = "Change password", onClick = {
-                focusManager.clearFocus()
-                profileViewModel.validateAndChangePassword(
-                    currentPassword = currentPassword,
-                    newPassword = newPassword,
-                    confirmNewPassword = confirmNewPassword
-                ) { success, message ->
-                    if (success) {
-                        passwordChanged = true
-                        profileViewModel.setMessage(message, MessageType.SUCCESS)
-                        profileViewModel.currentPasswordMutable.value = ""
-                        profileViewModel.newPasswordMutable.value = ""
-                        profileViewModel.confirmNewPasswordMutable.value = ""
-                    } else {
-                        profileViewModel.setMessage(message, MessageType.ERROR)
+            ApplicationButton(
+                text = stringResource(R.string.authenticated_settings_account_edit_password_change_password_button),
+                onClick = {
+                    focusManager.clearFocus()
+                    profileViewModel.validateAndChangePassword(
+                        currentPassword = currentPassword,
+                        newPassword = newPassword,
+                        confirmNewPassword = confirmNewPassword
+                    ) { success, message ->
+                        if (success) {
+                            passwordChanged = true
+                            profileViewModel.setMessage(message, MessageType.SUCCESS)
+                            profileViewModel.currentPasswordMutable.value = ""
+                            profileViewModel.newPasswordMutable.value = ""
+                            profileViewModel.confirmNewPasswordMutable.value = ""
+                        } else {
+                            profileViewModel.setMessage(message, MessageType.ERROR)
+                        }
                     }
-                }
-            })
+                })
         }
     }
     MessageBox(message = message, messageType = messageType, visible = messageState)

@@ -7,19 +7,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +26,8 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -41,19 +41,19 @@ import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import com.darkindustry.studenthelper.R
-import com.darkindustry.studenthelper.navigation.NavigationRoute
 import com.darkindustry.studenthelper.logic.utils.MessageBox
 import com.darkindustry.studenthelper.logic.utils.Utils
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationButton
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationTextField
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.CustomHeader
+import com.darkindustry.studenthelper.navigation.NavigationRoute
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun PasswordRecoveryContentPasswordEnter(
     passwordRecoveryViewModel: PasswordRecoveryViewModel = hiltViewModel(),
     navController: NavController,
-    email: String
+    email: String,
 ) {
     rememberSystemUiController().apply {
         setStatusBarColor(color = MaterialTheme.colorScheme.background)
@@ -69,6 +69,11 @@ fun PasswordRecoveryContentPasswordEnter(
     val message by passwordRecoveryViewModel.message.collectAsState()
 
     val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
 
     var isLoading by remember { mutableStateOf(false) }
 
@@ -92,7 +97,8 @@ fun PasswordRecoveryContentPasswordEnter(
                 confirmPassword = confirmPassword,
                 showPassword = showPassword,
                 focusManager = focusManager,
-                isLoading = { isLoading = it }
+                isLoading = { isLoading = it },
+                focusRequester = focusRequester
             )
         }
 
@@ -105,7 +111,7 @@ fun PasswordRecoveryContentPasswordEnter(
 }
 
 @Composable
-fun PasswordRecoveryContentEnterPasswordForm(
+private fun PasswordRecoveryContentEnterPasswordForm(
     passwordRecoveryViewModel: PasswordRecoveryViewModel,
     navController: NavController,
     email: String,
@@ -113,6 +119,7 @@ fun PasswordRecoveryContentEnterPasswordForm(
     confirmPassword: String,
     showPassword: Boolean,
     focusManager: FocusManager,
+    focusRequester: FocusRequester,
     isLoading: (Boolean) -> Unit,
 ) {
     Column(
@@ -124,14 +131,14 @@ fun PasswordRecoveryContentEnterPasswordForm(
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
         PopBack(navController)
-        Spacer(modifier = Modifier.height(48.dp))
+        Spacer(modifier = Modifier.height(36.dp))
         PasswordRecoveryEnterHeader()
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.height(32.dp))
         ApplicationTextField(
-            topText = stringResource(R.string.password_recovery_enter_password_current_password_label),
+            topText = stringResource(R.string.authentication_password_recovery_enter_password_new_password_label),
             value = password,
             onValueChange = passwordRecoveryViewModel::onPasswordChange,
-            placeholderText = stringResource(R.string.password_recovery_etner_password_current_password_placeholder),
+            placeholderText = stringResource(R.string.authentication_password_recovery_enter_password_new_password_placeholder),
             leadingIcon = {
                 Image(
                     painter = painterResource(id = R.drawable.ic_lock),
@@ -155,7 +162,11 @@ fun PasswordRecoveryContentEnterPasswordForm(
                         } else {
                             "Show password"
                         },
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f)),
+                        colorFilter = ColorFilter.tint(
+                            MaterialTheme.colorScheme.secondary.copy(
+                                alpha = 0.67f
+                            )
+                        ),
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -164,14 +175,15 @@ fun PasswordRecoveryContentEnterPasswordForm(
                 VisualTransformation.None
             } else {
                 PasswordVisualTransformation()
-            }
+            },
+            modifier = Modifier.focusRequester(focusRequester)
         )
         Spacer(modifier = Modifier.height(16.dp))
         ApplicationTextField(
-            topText = "Confirm Password",
+            topText = stringResource(R.string.authentication_password_recovery_enter_password_confirm_password_label),
             value = confirmPassword,
             onValueChange = passwordRecoveryViewModel::onConfirmPasswordChange,
-            placeholderText = "• • • • • • • • •",
+            placeholderText = stringResource(R.string.authentication_password_recovery_enter_password_confirm_password_placeholder),
             leadingIcon = {
                 Image(
                     painter = painterResource(id = R.drawable.ic_lock),
@@ -195,7 +207,11 @@ fun PasswordRecoveryContentEnterPasswordForm(
                         } else {
                             "Show password"
                         },
-                        colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f)),
+                        colorFilter = ColorFilter.tint(
+                            MaterialTheme.colorScheme.secondary.copy(
+                                alpha = 0.67f
+                            )
+                        ),
                         modifier = Modifier.size(22.dp)
                     )
                 }
@@ -208,7 +224,7 @@ fun PasswordRecoveryContentEnterPasswordForm(
         )
         Spacer(modifier = Modifier.height(24.dp))
         ApplicationButton(
-            text = "Change Password",
+            text = stringResource(R.string.authentication_password_recovery_enter_password_change_password),
             onClick = {
                 focusManager.clearFocus()
                 isLoading(true)
@@ -218,7 +234,7 @@ fun PasswordRecoveryContentEnterPasswordForm(
                     onResult = {
                         passwordRecoveryViewModel.changePassword(
                             newPassword = password
-                        ){
+                        ) {
                             navController.navigate(
                                 NavigationRoute.Authentication.Login.route
                             )
@@ -242,16 +258,7 @@ private fun PopBack(navController: NavController) {
         horizontalArrangement = Arrangement.Start
     ) {
         CustomHeader(
-            left = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_arrow_left),
-                    contentDescription = "popBack",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .offset(x = (-10).dp)
-                )
-            },
+            leftIcon = R.drawable.ic_arrow_left,
             onLeftClick = {
                 navController.popBackStack()
             }
@@ -267,15 +274,17 @@ fun PasswordRecoveryEnterHeader() {
         horizontalAlignment = Alignment.Start
     ) {
         Text(
-            text = "Enter new password", style = MaterialTheme.typography.displaySmall.copy(
+            text = stringResource(R.string.authentication_password_recovery_enter_password_header),
+            style = MaterialTheme.typography.displaySmall.copy(
                 color = MaterialTheme.colorScheme.secondary,
                 fontSize = 24.sp,
                 fontFamily = FontFamily.Default,
                 fontWeight = FontWeight.SemiBold
             )
         )
+        Spacer(modifier = Modifier.height(2.dp))
         Text(
-            text = "Password must contain at least 8 characters",
+            text = stringResource(R.string.authentication_password_recovery_enter_password_header_text),
             style = MaterialTheme.typography.bodySmall.copy(
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f),
                 fontSize = 16.sp,

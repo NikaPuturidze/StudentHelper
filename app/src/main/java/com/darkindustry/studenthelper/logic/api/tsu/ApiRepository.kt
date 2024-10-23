@@ -76,18 +76,29 @@ class ApiRepository @Inject constructor(
             }
     }
 
-    fun executeBatchUpdate(userRef: DocumentReference, fieldPath: String, newValue: Any) {
+    fun executeBatchUpdate(
+        userRef: DocumentReference,
+        fieldPath: String,
+        newValue: Any,
+        onSuccess: () -> Unit = {},
+        onFailure: () -> Unit = {}
+    ) {
         val batch = firebaseFirestore.batch()
         batch.update(userRef, fieldPath, newValue)
-        batch.commit().addOnFailureListener { e ->
-            firebaseCrashlytics.recordException(e)
-        }
+        batch.commit()
+            .addOnSuccessListener {
+                onSuccess()
+            }
+            .addOnFailureListener { e ->
+                firebaseCrashlytics.recordException(e)
+                onFailure()
+            }
     }
 
     private fun executeBatchDelete(
         userRef: DocumentReference = firebaseFirestore.collection("users")
             .document(firebaseAuth.currentUser?.uid ?: ""),
-        fieldPath: String,
+        fieldPath: String
     ) {
         val batch = firebaseFirestore.batch()
         batch.update(userRef, fieldPath, FieldValue.delete())

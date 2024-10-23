@@ -44,10 +44,7 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -55,7 +52,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -169,7 +165,7 @@ private fun PasswordRecoveryVerifyEmailForm(
     isLoading: (Boolean) -> Unit,
 ) {
     val bottomPadding = if (keyboardHeightDp > 0.dp) {
-        maxOf(12.dp, keyboardHeightDp - 12.dp)
+        maxOf(100.dp, keyboardHeightDp - 40.dp)
     } else {
         12.dp
     }
@@ -177,7 +173,7 @@ private fun PasswordRecoveryVerifyEmailForm(
     val annotatedString = buildAnnotatedString {
         pushStringAnnotation(tag = "ახალი კოდი", annotation = "performAction")
         withStyle(style = MaterialTheme.typography.bodyLarge.toSpanStyle()) {
-            append(stringResource(R.string.password_recovery_verify_email_new_code))
+            append(stringResource(R.string.authentication_password_recovery_verify_email_new_code))
         }
         pop()
     }
@@ -199,7 +195,7 @@ private fun PasswordRecoveryVerifyEmailForm(
         ApplicationTextField(
             value = userEnteredVerificationCode,
             onValueChange = passwordRecoveryViewModel::onUserEnteredCodeChange,
-            placeholderText = stringResource(R.string.password_recovery_verify_email_code_placeholder),
+            placeholderText = stringResource(R.string.authentication_password_recovery_verify_email_code_placeholder),
             trailingIcon = {
                 Row(
                     modifier = Modifier.padding(end = 16.dp),
@@ -219,26 +215,30 @@ private fun PasswordRecoveryVerifyEmailForm(
                         )
                     }
                     Spacer(modifier = Modifier.width(2.dp))
-                    @Suppress("DEPRECATION")
-                    ClickableText(text = annotatedString, style = TextStyle(
-                        fontSize = 18.sp, color = if (resendCode) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.33f)
-                        }
-                    ), onClick = { offset ->
-                        if (resendCode) {
-                            annotatedString.getStringAnnotations(
-                                tag = "ახალი კოდი", start = offset, end = offset
-                            ).firstOrNull()?.let { annotation ->
-                                if (annotation.item == "performAction") {
-                                    passwordRecoveryViewModel.sendVerificationCode(
-                                        email, onSuccess = { setResendCode(false) }
-                                    )
+                    ClickableText(
+                        text = annotatedString,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            color = if (resendCode) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.33f)
+                            }
+                        ),
+                        onClick = { offset ->
+                            if (resendCode) {
+                                annotatedString.getStringAnnotations(
+                                    tag = "ახალი კოდი", start = offset, end = offset
+                                ).firstOrNull()?.let { annotation ->
+                                    if (annotation.item == "performAction") {
+                                        passwordRecoveryViewModel.sendVerificationCode(
+                                            email,
+                                            onSuccess = { setResendCode(false) }
+                                        )
+                                    }
                                 }
                             }
                         }
-                    })
+                    )
                 }
             },
             visualTransformation = if (codeVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -247,7 +247,7 @@ private fun PasswordRecoveryVerifyEmailForm(
         )
         Spacer(modifier = Modifier.weight(1f))
         ApplicationButton(
-            text = stringResource(R.string.password_recovery_verify_email_next_button),
+            text = stringResource(R.string.authentication_password_recovery_verify_email_next_button),
             onClick = {
                 focusManager.clearFocus()
                 isLoading(true)
@@ -298,13 +298,8 @@ private fun PasswordRecoveryVerificationHeader() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.password_recovery_verify_email_header),
-            style = MaterialTheme.typography.displaySmall.copy(
-                color = MaterialTheme.colorScheme.secondary,
-                fontSize = 28.sp,
-                fontFamily = FontFamily.Default,
-                fontWeight = FontWeight.Bold
-            )
+            text = stringResource(R.string.authentication_password_recovery_verify_email_header),
+            style = MaterialTheme.typography.displaySmall.copy(color = MaterialTheme.colorScheme.secondary)
         )
     }
 }
@@ -329,7 +324,7 @@ private fun EmailVerificationHeaderText(
                         letterSpacing = MaterialTheme.typography.bodyLarge.letterSpacing,
                     )
                 ) {
-                    append(stringResource(R.string.password_recovery_verify_email_header_text))
+                    append(stringResource(R.string.authentication_password_recovery_verify_email_header_text))
                 }
                 withStyle(
                     style = SpanStyle(

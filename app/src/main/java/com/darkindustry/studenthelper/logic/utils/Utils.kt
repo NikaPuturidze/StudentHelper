@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.offset
@@ -40,6 +41,7 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Color.Companion.Transparent
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
@@ -48,7 +50,6 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.darkindustry.studenthelper.R
 import kotlinx.coroutines.launch
 import java.util.Base64
@@ -82,13 +83,24 @@ class Utils {
             modifier?.fillMaxWidth()?.let { it ->
                 Row(
                     modifier = it
-                        .height(60.dp)
+                        .fillMaxWidth()
+                        .shadow(
+                            elevation = GLOBAL_ELEVATION,
+                            shape = RoundedCornerShape(12.dp),
+                            clip = true,
+                        )
+                        .background(
+                            color = MaterialTheme.colorScheme.onBackground,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .height(56.dp)
                         .clickable { onClick() },
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     if (primaryIconId != null) {
                         Box(
                             modifier = Modifier
+                                .padding(start = 16.dp)
                                 .height(55.dp)
                                 .background(
                                     color = MaterialTheme.colorScheme.onBackground,
@@ -103,13 +115,17 @@ class Utils {
                                 modifier = Modifier.size(24.dp)
                             )
                         }
-                        Spacer(modifier = Modifier.width(14.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
+                    } else {
+                        Spacer(modifier = Modifier.width(16.dp))
                     }
                     primaryText?.let { it ->
                         Text(
-                            text = it, style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = 17.sp, color = primaryTextColor
-                            )
+                            text = it, style = MaterialTheme.typography.bodyLarge.copy(
+                                color = primaryTextColor.copy(alpha = 0.87f)
+                            ),
+                            modifier = Modifier
+                                .offset(y = 1.dp)
                         )
                     }
                     Spacer(modifier = Modifier.weight(1f))
@@ -117,12 +133,13 @@ class Utils {
                         Text(
                             text = it,
                             style = MaterialTheme.typography.bodySmall.copy(
-                                fontSize = 14.sp,
                                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
                             ),
                             maxLines = 1,
                             overflow = TextOverflow.Ellipsis,
-                            modifier = Modifier.widthIn(max = 210.dp)
+                            modifier = Modifier
+                                .widthIn(max = 180.dp)
+                                .offset(y = 1.dp)
                         )
                     }
                     Spacer(modifier = Modifier.width(5.dp))
@@ -131,13 +148,14 @@ class Utils {
                             Icon(
                                 painter = it,
                                 contentDescription = "Arrow",
-                                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f),
+                                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.6f),
                                 modifier = Modifier.size(26.dp)
                             )
                         }
                     }
-                    Spacer(modifier = Modifier.width(8.dp))
+                    Spacer(modifier = Modifier.width(10.dp))
                 }
+                Spacer(modifier = Modifier.height(6.dp))
             }
         }
 
@@ -164,7 +182,6 @@ class Utils {
                             text = title,
                             style = MaterialTheme.typography.displaySmall.copy(
                                 color = MaterialTheme.colorScheme.secondary,
-                                fontSize = 26.sp,
                                 fontWeight = FontWeight.SemiBold
                             ),
                             modifier = Modifier.padding(bottom = 8.dp)
@@ -181,7 +198,6 @@ class Utils {
                             text = message,
                             style = MaterialTheme.typography.bodyLarge.copy(
                                 color = MaterialTheme.colorScheme.secondary,
-                                fontSize = 16.sp,
                                 textAlign = TextAlign.Center
                             ),
                             modifier = Modifier.padding(bottom = 8.dp)
@@ -208,7 +224,6 @@ class Utils {
                             Text(
                                 text = confirmButtonText,
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 18.sp,
                                     color = MaterialTheme.colorScheme.onPrimary
                                 )
                             )
@@ -230,7 +245,6 @@ class Utils {
                             Text(
                                 text = cancelButtonText,
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 16.sp,
                                     color = MaterialTheme.colorScheme.secondary
                                 )
                             )
@@ -245,68 +259,128 @@ class Utils {
         fun CustomHeader(
             modifier: Modifier = Modifier,
             title: String = "",
-            left: (@Composable () -> Unit)? = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_privacy),
-                    contentDescription = null,
-                    tint = Color.Transparent,
-                    modifier = modifier.size(20.dp)
-                )
-            },
+            leftIcon: Int? = null,
             onLeftClick: suspend () -> Unit = {},
-            right: (@Composable () -> Unit)? = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_privacy),
-                    contentDescription = null,
-                    tint = Color.Transparent,
-                    modifier = modifier.size(20.dp)
-                )
-            },
+            rightIcon: Int? = null,
             onRightClick: suspend () -> Unit = {},
             textColor: Color = MaterialTheme.colorScheme.secondary,
-            enableDivider: Boolean = true
+            enableDivider: Boolean = true,
         ) {
             val coroutineScope = rememberCoroutineScope()
 
             Row(
                 modifier = modifier
                     .fillMaxWidth()
-                    .offset(y = (-4).dp)
-                    .wrapContentHeight()
-                    .padding(horizontal = 10.dp),
+                    .background(MaterialTheme.colorScheme.onBackground)
+                    .padding(horizontal = 10.dp)
+                    .offset(y = (-2).dp)
+                    .wrapContentHeight(),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.Center
             ) {
-                left?.let {
-                    IconButton(onClick = { coroutineScope.launch { onLeftClick() } }) {
-                        it()
+                if (leftIcon != null) {
+                    IconButton(
+                        onClick = { coroutineScope.launch { onLeftClick() } },
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.size(
+                                if (leftIcon == R.drawable.ic_arrow_left) 28.dp else 26.dp
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(id = leftIcon),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f),
+                                modifier = modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                } else {
+                    IconButton(
+                        onClick = { },
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.size(
+                                when (leftIcon) {
+                                    R.drawable.ic_arrow_left -> 28.dp
+                                    R.drawable.ic_qr -> 22.dp
+                                    else -> 26.dp
+                                }
+                            )
+                        ) {
+                            leftIcon?.let {
+                                Icon(
+                                    painter = painterResource(id = it),
+                                    contentDescription = null,
+                                    tint = Color.Transparent,
+                                    modifier = modifier.fillMaxSize()
+                                )
+                            }
+                        }
                     }
                 }
                 Spacer(modifier = Modifier.weight(1f))
                 Text(
                     text = title,
-                    style = MaterialTheme.typography.titleLarge.copy(
-                        color = textColor,
-                        fontSize = 24.sp
-                    )
+                    style = MaterialTheme.typography.headlineMedium.copy(
+                        color = textColor.copy(alpha = 0.67f),
+                    ),
+                    modifier = Modifier.offset(y = (2).dp)
                 )
                 Spacer(modifier = Modifier.weight(1f))
-                right?.let {
-                    IconButton(onClick = { coroutineScope.launch { onRightClick() } }) {
-                        it()
+                if (rightIcon != null) {
+                    IconButton(
+                        onClick = { coroutineScope.launch { onRightClick() } },
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.size(
+                                when (rightIcon) {
+                                    R.drawable.ic_settings_outlined -> 28.dp
+                                    else -> 26.dp
+                                }
+                            )
+                        ) {
+                            Icon(
+                                painter = painterResource(id = rightIcon),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f),
+                                modifier = modifier.fillMaxSize()
+                            )
+                        }
+                    }
+                } else {
+                    IconButton(
+                        onClick = { },
+                    ) {
+                        Box(
+                            contentAlignment = Alignment.Center,
+                            modifier = Modifier.size(26.dp)
+                        ) {
+                            rightIcon?.let {
+                                Icon(
+                                    painter = painterResource(id = it),
+                                    contentDescription = null,
+                                    tint = Transparent,
+                                    modifier = modifier.fillMaxSize()
+                                )
+                            }
+                        }
                     }
                 }
             }
-            if (enableDivider){
+            if (enableDivider) {
                 HorizontalDivider(
+                    thickness = 0.2.dp,
                     modifier = Modifier.shadow(
-                        elevation = 1.dp,
-                        shape = MaterialTheme.shapes.large,
+                        elevation = GLOBAL_ELEVATION
                     ),
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.33f)
+                    color = Transparent,
                 )
 
-                Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(2.dp))
             }
         }
 
@@ -363,6 +437,7 @@ class Utils {
             keyboardType: KeyboardType = KeyboardType.Text,
             maxLines: Int = 1,
             focusRequester: FocusRequester? = null,
+            enabled: Boolean = true,
         ) {
             Row(
                 modifier = Modifier
@@ -377,7 +452,7 @@ class Utils {
                     Text(
                         text = topText,
                         style = MaterialTheme.typography.bodyMedium.copy(
-                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.77f),
+                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f),
                         )
                     )
                 }
@@ -395,6 +470,7 @@ class Utils {
                         )
                     )
                 },
+                enabled = enabled,
                 colors = OutlinedTextFieldDefaults.colors(
                     focusedBorderColor = Color.Transparent,
                     unfocusedBorderColor = Color.Transparent,
@@ -421,7 +497,7 @@ class Utils {
                 shape = RoundedCornerShape(12.dp),
                 visualTransformation = visualTransformation
             )
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(12.dp))
         }
     }
 }

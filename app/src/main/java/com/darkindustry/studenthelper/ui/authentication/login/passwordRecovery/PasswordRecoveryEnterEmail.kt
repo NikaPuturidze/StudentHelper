@@ -31,10 +31,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
@@ -113,10 +110,10 @@ private fun PasswordRecoveryContentMainForm(
         PasswordRecoveryHeader()
         Spacer(modifier = Modifier.height(32.dp))
         ApplicationTextField(
-            topText = stringResource(R.string.password_recovery_enter_email_label),
+            topText = stringResource(R.string.authentication_password_recovery_enter_email_label),
             value = email,
             onValueChange = passwordRecoveryViewModel::onEmailChange,
-            placeholderText = stringResource(R.string.password_recovery_enter_email_placeholder),
+            placeholderText = stringResource(R.string.authentication_password_recovery_enter_email_placeholder),
             leadingIcon = {
                 Image(
                     painter = painterResource(id = R.drawable.ic_envelope),
@@ -127,21 +124,28 @@ private fun PasswordRecoveryContentMainForm(
             })
         Spacer(modifier = Modifier.height(24.dp))
         ApplicationButton(
-            text = stringResource(R.string.password_recovery_enter_email_button),
+            text = stringResource(R.string.authentication_password_recovery_enter_email_button),
             onClick = {
                 focusManager.clearFocus()
                 isLoading(true)
                 passwordRecoveryViewModel.validateAndRecoverPassword(
                     email = email,
                     onSuccess = {
-                        passwordRecoveryViewModel.sendVerificationCode(email, onSuccess = {
-                            navController.navigate(
-                                NavigationRoute.Authentication.PasswordRecovery.VerifyEmail.route.replace(
-                                    "{email}",
-                                    email
-                                )
-                            )
-                        })
+                        passwordRecoveryViewModel.checkEmail(email,
+                            onSuccess = {
+                                passwordRecoveryViewModel.sendVerificationCode(email, onSuccess = {
+                                    navController.navigate(
+                                        NavigationRoute.Authentication.PasswordRecovery.VerifyEmail.route.replace(
+                                            "{email}",
+                                            email
+                                        )
+                                    )
+                                })
+                            },
+                            onFailure = {
+                                isLoading(false)
+                            }
+                        )
                     },
                     onFailure = {
                         isLoading(false)
@@ -179,7 +183,7 @@ private fun PasswordRecoveryHeader() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.password_recovery_enter_email_header),
+            text = stringResource(R.string.authentication_password_recovery_enter_email_header),
             style = MaterialTheme.typography.displaySmall.copy(
                 color = MaterialTheme.colorScheme.secondary,
             )
@@ -191,7 +195,7 @@ private fun PasswordRecoveryHeader() {
             horizontalArrangement = Arrangement.Center
         ) {
             Text(
-                text = stringResource(R.string.password_recovery_enter_email_header_text),
+                text = stringResource(R.string.authentication_password_recovery_enter_email_header_text),
                 style = MaterialTheme.typography.bodyMedium.copy(
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f),
                     textAlign = TextAlign.Center

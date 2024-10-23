@@ -8,17 +8,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -44,7 +41,6 @@ import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
@@ -53,7 +49,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -176,7 +171,7 @@ private fun RegistrationVerifyEmailForm(
     username: String,
 ) {
     val bottomPadding = if (keyboardHeightDp > 0.dp) {
-        maxOf(12.dp, keyboardHeightDp - 12.dp)
+        maxOf(100.dp, keyboardHeightDp - 40.dp)
     } else {
         12.dp
     }
@@ -184,7 +179,7 @@ private fun RegistrationVerifyEmailForm(
     val annotatedString = buildAnnotatedString {
         pushStringAnnotation(tag = "ახალი კოდი", annotation = "performAction")
         withStyle(style = MaterialTheme.typography.bodyLarge.toSpanStyle()) {
-            append(stringResource(R.string.registration_verify_email_new_code))
+            append(stringResource(R.string.authentication_registration_verify_email_new_code))
         }
         pop()
     }
@@ -208,7 +203,7 @@ private fun RegistrationVerifyEmailForm(
         ApplicationTextField(
             value = userEnteredVerificationCode,
             onValueChange = registrationViewModel::onUserEnteredCodeChange,
-            placeholderText = stringResource(R.string.registration_verify_email_code_placeholder),
+            placeholderText = stringResource(R.string.authentication_registration_verify_email_code_placeholder),
             trailingIcon = {
                 Row(
                     modifier = Modifier.padding(end = 16.dp),
@@ -228,31 +223,36 @@ private fun RegistrationVerifyEmailForm(
                         )
                     }
                     Spacer(modifier = Modifier.width(2.dp))
-                    ClickableText(text = annotatedString, style = TextStyle(
-                        fontSize = 18.sp, color = if (resendCode) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.33f)
-                        }
-                    ), onClick = { offset ->
-                        if (resendCode) {
-                            annotatedString.getStringAnnotations(
-                                tag = "ახალი კოდი", start = offset, end = offset
-                            ).firstOrNull()?.let { annotation ->
-                                if (annotation.item == "performAction") {
-                                    registrationViewModel.sendVerificationCode(
-                                        email,
-                                        onSuccess = {
-                                            setResendCode(false)
-                                        },
-                                        onFailure = {
-                                            setResendCode(true)
-                                        }
-                                    )
+                    ClickableText(
+                        text = annotatedString,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            color = if (resendCode) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.33f)
+                            }
+                        ),
+                        onClick = { offset ->
+                            if (resendCode) {
+                                annotatedString.getStringAnnotations(
+                                    tag = "ახალი კოდი", start = offset, end = offset
+                                ).firstOrNull()?.let { annotation ->
+                                    if (annotation.item == "performAction") {
+                                        registrationViewModel.sendVerificationCode(
+                                            email,
+                                            onSuccess = {
+                                                setResendCode(false)
+                                            },
+                                            onFailure = {
+                                                setResendCode(true)
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
-                    })
+                    )
+
                 }
             },
             visualTransformation = if (codeVisible) VisualTransformation.None else PasswordVisualTransformation(),
@@ -261,7 +261,7 @@ private fun RegistrationVerifyEmailForm(
         )
         Spacer(modifier = Modifier.weight(1f))
         ApplicationButton(
-            text = stringResource(R.string.registration_verify_email_next_button),
+            text = stringResource(R.string.authentication_registration_verify_email_next_button),
             onClick = {
                 focusManager.clearFocus()
                 isLoading(true)
@@ -297,16 +297,7 @@ private fun PopBack(navController: NavController) {
         horizontalArrangement = Arrangement.Start
     ) {
         CustomHeader(
-            left = {
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_arrow_left),
-                    contentDescription = "popBack",
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier
-                        .aspectRatio(1f)
-                        .offset(x = (-10).dp)
-                )
-            },
+            leftIcon = R.drawable.ic_arrow_left,
             onLeftClick = {
                 navController.popBackStack()
             }
@@ -322,7 +313,7 @@ private fun EmailVerificationHeader() {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text(
-            text = stringResource(R.string.registration_verify_email_header),
+            text = stringResource(R.string.authentication_registration_verify_email_header),
             style = MaterialTheme.typography.displayMedium.copy(
                 color = MaterialTheme.colorScheme.secondary
             )
@@ -350,7 +341,7 @@ private fun EmailVerificationHeaderText(
                         letterSpacing = MaterialTheme.typography.bodyLarge.letterSpacing,
                     )
                 ) {
-                    append(stringResource(R.string.registration_verify_email_header_text))
+                    append(stringResource(R.string.authentication_registration_verify_email_header_text))
                 }
                 withStyle(
                     style = SpanStyle(

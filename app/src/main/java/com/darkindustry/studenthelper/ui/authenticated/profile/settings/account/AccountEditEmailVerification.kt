@@ -19,19 +19,13 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.OutlinedTextFieldDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
@@ -41,25 +35,25 @@ import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
+import androidx.compose.ui.focus.FocusManager
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
-import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -68,6 +62,8 @@ import com.darkindustry.studenthelper.R
 import com.darkindustry.studenthelper.logic.utils.MessageBox
 import com.darkindustry.studenthelper.logic.utils.MessageType
 import com.darkindustry.studenthelper.logic.utils.Utils
+import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationButton
+import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationTextField
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.CustomHeader
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.GLOBAL_TRANSITION_TIME
 import com.darkindustry.studenthelper.navigation.NavigationRoute
@@ -81,16 +77,16 @@ fun AccountEditEmailVerification(
     dbEmail: String,
 ) {
     rememberSystemUiController().apply {
-        setStatusBarColor(color = MaterialTheme.colorScheme.background)
+        setStatusBarColor(color = MaterialTheme.colorScheme.onBackground)
         setNavigationBarColor(color = MaterialTheme.colorScheme.background)
     }
 
     val warningAboutEmailChangeText = buildAnnotatedString {
         withStyle(style = SpanStyle(color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f))) {
-            append("Email change are available only once in ")
+            append(stringResource(R.string.authenticated_settings_account_edit_email_verification_warning) + " ")
         }
         withStyle(style = SpanStyle(color = Color.Red.copy(alpha = 0.67f))) {
-            append("30 DAYS.")
+            append(stringResource(R.string.authenticated_settings_account_edit_email_verification_warning2))
         }
     }
 
@@ -105,12 +101,19 @@ fun AccountEditEmailVerification(
     val (resendCode, setResendCode) = remember { mutableStateOf(true) }
     val currentEmail by remember { mutableStateOf(dbEmail) }
 
+    val focusManager = LocalFocusManager.current
+    val focusRequester = remember { FocusRequester() }
+
     if (verificationStatus) {
-        navController.navigate(
-            NavigationRoute.Authenticated.Settings.Account.AccountInformation.EditEmail.route.also {
-                profileViewModel.setVerificationStatus(false)
+        navController.navigate(NavigationRoute.Authenticated.Settings.Account.AccountInformation.EditEmail.route) {
+            launchSingleTop = true
+            popUpTo(NavigationRoute.Authenticated.Settings.Account.AccountInformation.EditEmail.route) {
+                saveState = true
             }
-        )
+            restoreState = true
+        }.also {
+            profileViewModel.setVerificationStatus(false)
+        }
     }
 
     Column(
@@ -128,7 +131,9 @@ fun AccountEditEmailVerification(
             currentEmail = currentEmail,
             userEnteredVerificationCode = userEnteredVerificationCode,
             warningAboutEmailChangeText = warningAboutEmailChangeText,
-            setResendCode = setResendCode
+            setResendCode = setResendCode,
+            focusManager = focusManager,
+            focusRequester = focusRequester,
         )
     }
 
@@ -148,19 +153,20 @@ fun AccountEditEmailVerificationForm(
     userEnteredVerificationCode: String,
     warningAboutEmailChangeText: AnnotatedString,
     setResendCode: (Boolean) -> Unit,
+    focusManager: FocusManager,
+    focusRequester: FocusRequester,
 ) {
     var codeSend by remember { mutableStateOf(false) }
 
-    CustomHeader(title = "Email", left = {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_arrow_left),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(32.dp)
-        )
-    }, onLeftClick = {
-        navController.popBackStack()
-    })
+    CustomHeader(
+        title = stringResource(R.string.authenticated_settings_account_edit_email_verification_header),
+        leftIcon = R.drawable.ic_arrow_left,
+        onLeftClick = {
+            navController.popBackStack(
+                route = NavigationRoute.Authenticated.Settings.Account.route,
+                inclusive = false
+            )
+        })
 
     Column(
         modifier = Modifier
@@ -225,7 +231,10 @@ fun AccountEditEmailVerificationForm(
                                 email = currentEmail,
                                 userEnteredVerificationCode = userEnteredVerificationCode
                             )
-                        }
+                        },
+                        codeSend = codeSend,
+                        focusRequester = focusRequester,
+                        focusManager = focusManager
                     )
                 }
             }
@@ -248,46 +257,37 @@ private fun ContentVerifyEmail(
         Spacer(modifier = Modifier.weight(1f))
 
         Text(
-            text = "Verify Email",
-            style = MaterialTheme.typography.titleMedium.copy(
+            text = stringResource(R.string.authenticated_settings_account_edit_email_verification_header_label),
+            style = MaterialTheme.typography.displaySmall.copy(
                 color = MaterialTheme.colorScheme.secondary,
-                fontSize = 24.sp,
-                fontWeight = FontWeight.SemiBold
             ),
             modifier = Modifier.padding(bottom = 16.dp)
         )
 
         Text(
-            text = "Please verify your current email address, $currentEmail, before making changes.",
-            style = MaterialTheme.typography.bodyMedium.copy(
+            text = stringResource(
+                R.string.authenticated_settings_account_edit_email_verification_header_text,
+                currentEmail
+            ),
+            style = MaterialTheme.typography.bodyLarge.copy(
                 color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.67f),
-                fontSize = 16.sp,
                 textAlign = TextAlign.Center
             ),
             modifier = Modifier.padding(bottom = 32.dp)
         )
 
-        Button(
-            onClick = onClick, modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 8.dp)
-                .height(48.dp), colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            ), shape = RoundedCornerShape(size = 12.dp)
-        ) {
-            Text(
-                text = "Send Verification Code", style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 20.sp
-                )
-            )
-        }
+        ApplicationButton(
+            text = stringResource(R.string.authenticated_settings_account_edit_email_verification_email_next_button),
+            onClick = {
+                onClick()
+            },
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
 
         Text(
             text = warningAboutEmailChangeText,
             style = MaterialTheme.typography.bodyMedium.copy(
                 color = MaterialTheme.colorScheme.errorContainer,
-                fontSize = 14.sp,
                 textAlign = TextAlign.Center
             ),
         )
@@ -305,8 +305,17 @@ private fun ContentEnterCode(
     setResendCode: (Boolean) -> Unit,
     currentEmail: String,
     onCodeResend: () -> Unit,
+    focusRequester: FocusRequester,
+    focusManager: FocusManager,
     onVerifyClick: () -> Unit,
+    codeSend: Boolean,
 ) {
+    LaunchedEffect(codeSend) {
+        if (codeSend) {
+            focusRequester.requestFocus()
+        }
+    }
+
     val view = LocalView.current
     var keyboardHeight by remember { mutableIntStateOf(0) }
 
@@ -314,7 +323,7 @@ private fun ContentEnterCode(
     val keyboardHeightDp by rememberUpdatedState(with(LocalDensity.current) { keyboardHeight.toDp() })
 
     val bottomPadding = if (keyboardHeightDp > 0.dp) {
-        maxOf(12.dp, keyboardHeightDp - 12.dp)
+        maxOf(100.dp, keyboardHeightDp - 40.dp)
     } else {
         12.dp
     }
@@ -333,47 +342,65 @@ private fun ContentEnterCode(
 
     Column(
         modifier = Modifier
-            .fillMaxSize(),
+            .fillMaxSize()
+            .background(color = MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Text(
-            text = "Verify your email", style = MaterialTheme.typography.displaySmall.copy(
-                color = MaterialTheme.colorScheme.secondary,
-                fontSize = 28.sp,
-                fontFamily = FontFamily.Default,
-                fontWeight = FontWeight.Bold
+        Spacer(modifier = Modifier.height(24.dp))
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = stringResource(R.string.authenticated_settings_account_edit_email_verification_verify_email_header),
+                style = MaterialTheme.typography.displaySmall.copy(color = MaterialTheme.colorScheme.secondary)
             )
-        )
+        }
 
-        Text(
-            text = buildAnnotatedString {
-                append("Enter the 6 digit code we sent to\n ")
-                append(currentEmail)
-            }, style = MaterialTheme.typography.bodyLarge.copy(
-                color = MaterialTheme.colorScheme.secondary, fontSize = 20.sp
-            ), textAlign = TextAlign.Center,
-            modifier = Modifier.padding(bottom = 24.dp)
-        )
+        Spacer(modifier = Modifier.height(8.dp))
 
-        OutlinedTextField(
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = buildAnnotatedString {
+                    withStyle(
+                        style = SpanStyle(
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                            fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+                            fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
+                            letterSpacing = MaterialTheme.typography.bodyLarge.letterSpacing,
+                        )
+                    ) {
+                        append(stringResource(R.string.authentication_registration_verify_email_header_text))
+                    }
+                    withStyle(
+                        style = SpanStyle(
+                            color = MaterialTheme.colorScheme.secondary,
+                            fontSize = MaterialTheme.typography.bodyLarge.fontSize,
+                            fontWeight = MaterialTheme.typography.bodyLarge.fontWeight,
+                            fontFamily = MaterialTheme.typography.bodyLarge.fontFamily,
+                            letterSpacing = MaterialTheme.typography.bodyLarge.letterSpacing,
+                        )
+                    ) {
+                        append("$currentEmail-ზე")
+                    }
+                },
+                textAlign = TextAlign.Center
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        ApplicationTextField(
             value = userEnteredVerificationCode,
-            textStyle = TextStyle(fontSize = 17.sp),
             onValueChange = profileViewModel::onUserEnteredCodeChange,
-            placeholder = {
-                Text(
-                    text = "Code",
-                    color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.4f),
-                    fontSize = 18.sp,
-                )
-            },
-            colors = OutlinedTextFieldDefaults.colors(
-                focusedBorderColor = Color.Transparent,
-                unfocusedBorderColor = Color.Transparent,
-                focusedTextColor = MaterialTheme.colorScheme.secondary,
-                unfocusedTextColor = MaterialTheme.colorScheme.secondary,
-            ),
-            visualTransformation = if (codeVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            placeholderText = stringResource(R.string.authenticated_settings_account_edit_email_verification_verify_email_code_placeholder),
             trailingIcon = {
                 Row(
                     modifier = Modifier.padding(end = 16.dp),
@@ -387,9 +414,7 @@ private fun ContentEnterCode(
                             ),
                             contentDescription = if (codeVisible) "Hide password" else "Show password",
                             colorFilter = ColorFilter.tint(
-                                MaterialTheme.colorScheme.secondary.copy(
-                                    alpha = 0.33f
-                                )
+                                MaterialTheme.colorScheme.secondary
                             ),
                             modifier = Modifier.size(20.dp)
                         )
@@ -397,60 +422,50 @@ private fun ContentEnterCode(
                     Spacer(modifier = Modifier.width(2.dp))
 
                     val annotatedString = buildAnnotatedString {
-                        pushStringAnnotation(tag = "ACTION", annotation = "performAction")
-                        append("Resend code")
+                        pushStringAnnotation(tag = "ახალი კოდი", annotation = "performAction")
+                        append(stringResource(R.string.authenticated_settings_account_edit_email_verification_email_new_code))
                         pop()
                     }
 
-                    ClickableText(text = annotatedString, style = TextStyle(
-                        fontSize = 18.sp, color = if (resendCode) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
-                        }
-                    ), onClick = { offset ->
-                        if (resendCode) {
-                            annotatedString.getStringAnnotations(
-                                tag = "ACTION", start = offset, end = offset
-                            ).firstOrNull()?.let { annotation ->
-                                if (annotation.item == "performAction") {
-                                    onCodeResend()
-                                    setResendCode(false)
+                    ClickableText(
+                        text = annotatedString,
+                        style = MaterialTheme.typography.bodyLarge.copy(
+                            color = if (resendCode) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.33f)
+                            }
+                        ),
+                        onClick = { offset ->
+                            if (resendCode) {
+                                annotatedString.getStringAnnotations(
+                                    tag = "ახალი კოდი", start = offset, end = offset
+                                ).firstOrNull()?.let { annotation ->
+                                    if (annotation.item == "performAction") {
+                                        onCodeResend()
+                                        setResendCode(false)
+                                    }
                                 }
                             }
                         }
-                    })
+                    )
                 }
             },
-            keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-            maxLines = 1,
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 24.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.onBackground),
-            shape = RoundedCornerShape(12.dp)
+            visualTransformation = if (codeVisible) VisualTransformation.None else PasswordVisualTransformation(),
+            keyboardType = KeyboardType.Number,
+            modifier = Modifier.focusRequester(focusRequester)
         )
 
         Spacer(modifier = Modifier.weight(1f))
 
-        Button(
-            onClick = onVerifyClick,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(48.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.primary,
-                disabledContainerColor = MaterialTheme.colorScheme.primary
-            ),
-            shape = RoundedCornerShape(size = 8.dp)
-        ) {
-            Text(
-                text = "Continue", style = MaterialTheme.typography.bodySmall.copy(
-                    color = MaterialTheme.colorScheme.onPrimary, fontSize = 20.sp
-                )
-            )
-        }
+        ApplicationButton(
+            text = stringResource(R.string.authentication_password_recovery_verify_email_next_button),
+            onClick = {
+                focusManager.clearFocus()
+                onVerifyClick()
+            }
+        )
+
         Spacer(modifier = Modifier.height(bottomPadding))
     }
 }

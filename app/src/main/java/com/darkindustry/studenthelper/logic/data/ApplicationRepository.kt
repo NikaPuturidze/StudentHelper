@@ -2,7 +2,6 @@ package com.darkindustry.studenthelper.logic.data
 
 import android.os.Build
 import android.os.NetworkOnMainThreadException
-import android.util.Log
 import androidx.annotation.RequiresExtension
 import com.google.firebase.FirebaseException
 import com.google.firebase.FirebaseTooManyRequestsException
@@ -18,6 +17,7 @@ import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.getValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.functions.FirebaseFunctions
+import com.google.firebase.functions.HttpsCallableResult
 import com.google.firebase.messaging.FirebaseMessaging
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.tasks.await
@@ -57,8 +57,7 @@ class ApplicationRepository @Inject constructor(
     private val httpClient: OkHttpClient = OkHttpClient(),
 ) {
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
-    private fun handleException(e: Exception): Exception {
-        Log.e("ExceptionHandler", "Caught exception: ${e::class.simpleName}: ${e.message}")
+    fun handleException(e: Exception): Exception {
         return when (e) {
             is FirebaseTooManyRequestsException -> Exception("მოთხოვნების ლიმიტი ამოიწურა. გთხოვთ სცადოთ მოგვიანებით.")
             is MalformedURLException -> Exception("გთხოვთ, გადაამოწმეთ URL მისამართი.")
@@ -109,15 +108,19 @@ class ApplicationRepository @Inject constructor(
     suspend fun registerUser(email: String, password: String, username: String): Result<Boolean> {
         return withContext(Dispatchers.IO) {
             try {
-                val authResult = firebaseAuth.createUserWithEmailAndPassword(email, password).await()
-                val userId = authResult.user?.uid ?: throw Exception("მომხმარებელი ვერ მოიძება, სცადეთ ხელახლა ან დაუკავშირდით ტექნიკურ ჯგუფს.")
+                val authResult =
+                    firebaseAuth.createUserWithEmailAndPassword(email, password).await()
+                val userId = authResult.user?.uid
+                    ?: throw Exception("მომხმარებელი ვერ მოიძება, სცადეთ ხელახლა ან დაუკავშირდით ტექნიკურ ჯგუფს.")
 
                 firebaseAuth.signInWithEmailAndPassword(email, password).await().user
 
                 try {
                     val fcmToken = firebaseMessaging.token.await()
-                    firebaseFirestore.collection("users").document(userId).update("fcmToken", fcmToken).await()
-                    firebaseFirestore.collection("users").document(userId).update("username", username).await()
+                    firebaseFirestore.collection("users").document(userId)
+                        .update("fcmToken", fcmToken).await()
+                    firebaseFirestore.collection("users").document(userId)
+                        .update("username", username).await()
                 } catch (e: Exception) {
                     firebaseCrashlytics.recordException(e)
                     throw Exception("ვერ მოხდა FCM ტოკენის განახლება, დაუკავშირდით ტექნიკურ ჯგუფს.")
@@ -317,10 +320,10 @@ class ApplicationRepository @Inject constructor(
         }
     }
 
-
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     suspend fun doesUserExistByEmail(email: String): Result<Boolean> {
-        val query = firebaseFirestore.collection("users").whereEqualTo("email", email).limit(1).get()
+        val query =
+            firebaseFirestore.collection("users").whereEqualTo("email", email).limit(1).get()
         return try {
             val result = query.await()
             Result.success(result.isEmpty.not())
@@ -331,14 +334,38 @@ class ApplicationRepository @Inject constructor(
     }
 
     @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
+    suspend fun changeCurrentUserEmail(newEmail: String): Result<String> {
+        val userId = firebaseAuth.currentUser?.uid
+            ?: throw Exception("მომხმარებელი ვერ მოიძება, სცადეთ ხელახლა ან დაუკავშირდით ტექნიკურ ჯგუფს.")
+        return try {
+            val data = hashMapOf("userId" to userId, "newEmail" to newEmail)
+
+            val result: HttpsCallableResult = firebaseFunctions
+                .getHttpsCallable("changeCurrentUserEmail")
+                .call(data)
+                .await()
+
+            val message = result.data as? Map<String, String>
+            Result.success(message?.get("message") ?: "ელ.ფოსტა წარმატებით შეიცვალა.")
+        } catch (e: Exception) {
+            firebaseCrashlytics.recordException(e)
+            Result.failure(handleException(e))
+        }
+    }
+
+    @RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
     fun changePassword(newPassword: String): Result<Boolean> {
         return try {
-            val userId = firebaseAuth.currentUser ?: throw Exception("მომხმარებელი ვერ მოიძება, სცადეთ ხელახლა ან დაუკავშირდით ტექნიკურ ჯგუფს.")
+            val userId = firebaseAuth.currentUser
+                ?: throw Exception("მომხმარებელი ვერ მოიძება, სცადეთ ხელახლა ან დაუკავშირდით ტექნიკურ ჯგუფს.")
             userId.updatePassword(newPassword).addOnCompleteListener { task ->
                 if (task.isSuccessful) {
                     Result.success(true)
                 } else {
-                    Result.failure(task.exception ?: Exception("შეცდომა პაროლის შეცვლისას. გთხოვთ სცადოთ ხელახლა."))
+                    Result.failure(
+                        task.exception
+                            ?: Exception("შეცდომა პაროლის შეცვლისას. გთხოვთ სცადოთ ხელახლა.")
+                    )
                 }
             }
             Result.success(true)
@@ -350,10 +377,13 @@ class ApplicationRepository @Inject constructor(
 
     suspend fun generateAndSaveTokenHttpRequest(uniqueId: String): Result<Unit> =
         withContext(Dispatchers.IO) {
-            val userId = firebaseAuth.currentUser?.uid ?: throw Exception("მომხმარებელი ვერ მოიძება, სცადეთ ხელახლა ან დაუკავშირდით ტექნიკურ ჯგუფს.")
-            val url = "https://us-central1-studenthelper-dark.cloudfunctions.net/generateAndSaveToken"
+            val userId = firebaseAuth.currentUser?.uid
+                ?: throw Exception("მომხმარებელი ვერ მოიძება, სცადეთ ხელახლა ან დაუკავშირდით ტექნიკურ ჯგუფს.")
+            val url =
+                "https://us-central1-studenthelper-dark.cloudfunctions.net/generateAndSaveToken"
 
-            val requestBody = FormBody.Builder().add("userId", userId).add("uniqueId", uniqueId).build()
+            val requestBody =
+                FormBody.Builder().add("userId", userId).add("uniqueId", uniqueId).build()
             val request = Request.Builder().url(url).post(requestBody).build()
 
             return@withContext try {

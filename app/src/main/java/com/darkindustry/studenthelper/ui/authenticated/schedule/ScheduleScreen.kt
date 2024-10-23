@@ -16,7 +16,6 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -25,19 +24,15 @@ import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.darkindustry.studenthelper.logic.utils.MessageBox
-import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationButton
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.CustomHeader
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.GLOBAL_ELEVATION
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.GLOBAL_PADDINGS
-import com.darkindustry.studenthelper.navigation.NavigationRoute
-import com.darkindustry.studenthelper.ui.authenticated.profile.ProfileViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
@@ -46,10 +41,10 @@ fun ScheduleScreen(
     navController: NavHostController,
     paddingValues: PaddingValues,
     dbUniversitySchedule: Map<String, List<Map<String, String>>>?,
-    dbUniversityLinked: String
+    dbUniversityLinked: String,
 ) {
     rememberSystemUiController().apply {
-        setStatusBarColor(color = MaterialTheme.colorScheme.background)
+        setStatusBarColor(color = MaterialTheme.colorScheme.onBackground)
         setNavigationBarColor(color = MaterialTheme.colorScheme.onBackground)
     }
 
@@ -87,153 +82,132 @@ fun ScheduleScreenForm(
     navController: NavHostController,
     universityLinked: String,
     dbUniversitySchedule: Map<String, List<Map<String, String>>>?,
-    sortedDays: List<String>
+    sortedDays: List<String>,
 ) {
     CustomHeader(
         title = "ცხრილი",
     )
 
-    if (universityLinked.isEmpty()) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            Text(
-                text = "To view your schedule, please link your university account first.",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center
-                )
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            ApplicationButton(text = "Link University", width = 0.5f, onClick = {
-                navController.navigate(NavigationRoute.Authenticated.Settings.Connections.route)
-            })
-        }
-    } else {
-        LazyColumn(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(GLOBAL_PADDINGS),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
-            sortedDays.forEach { day ->
-                val subjects = dbUniversitySchedule?.get(day) ?: emptyList()
-                item {
-                    Row(
+    LazyColumn(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(GLOBAL_PADDINGS),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        sortedDays.forEach { day ->
+            val subjects = dbUniversitySchedule?.get(day) ?: emptyList()
+            item {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .background(
+                            color = MaterialTheme.colorScheme.primary,
+                            shape = RoundedCornerShape(12.dp)
+                        )
+                        .padding(horizontal = 16.dp, vertical = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = day, style = MaterialTheme.typography.titleMedium.copy(
+                            color = Color.White, fontSize = 20.sp
+                        )
+                    )
+                }
+                Spacer(modifier = Modifier.height(10.dp))
+                subjects.forEach { subject ->
+                    Card(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .background(
-                                color = MaterialTheme.colorScheme.primary,
-                                shape = RoundedCornerShape(12.dp)
+                            .padding(bottom = 12.dp)
+                            .shadow(
+                                elevation = GLOBAL_ELEVATION,
+                                shape = RoundedCornerShape(12.dp),
+                                clip = true
                             )
-                            .padding(horizontal = 16.dp, vertical = 12.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Text(
-                            text = day, style = MaterialTheme.typography.titleMedium.copy(
-                                color = Color.White, fontSize = 20.sp
-                            )
-                        )
-                    }
-                    Spacer(modifier = Modifier.height(10.dp))
-                    subjects.forEach { subject ->
-                        Card(
+                        Column(
                             modifier = Modifier
+                                .background(color = MaterialTheme.colorScheme.onBackground)
+                                .padding(GLOBAL_PADDINGS)
                                 .fillMaxWidth()
-                                .padding(bottom = 12.dp)
-                                .shadow(
-                                    elevation = GLOBAL_ELEVATION,
-                                    shape = RoundedCornerShape(12.dp),
-                                    clip = true
-                                )
                         ) {
-                            Column(
-                                modifier = Modifier
-                                    .background(color = MaterialTheme.colorScheme.onBackground)
-                                    .padding(GLOBAL_PADDINGS)
-                                    .fillMaxWidth()
-                            ) {
-                                Text(text = buildAnnotatedString {
-                                    withStyle(
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.secondary.copy(
-                                                alpha = 0.9f
-                                            ), fontSize = 14.sp
-                                        ).toSpanStyle()
-                                    ) {
-                                        append("${subject["subjectType"]}: ")
-                                    }
-                                    withStyle(
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.secondary.copy(
-                                                alpha = 0.8f
-                                            ), fontSize = 14.sp
-                                        ).toSpanStyle()
-                                    ) {
-                                        append("${subject["startTime"]} - ${subject["endTime"]}")
-                                    }
-                                })
+                            Text(text = buildAnnotatedString {
+                                withStyle(
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.secondary.copy(
+                                            alpha = 0.9f
+                                        ), fontSize = 14.sp
+                                    ).toSpanStyle()
+                                ) {
+                                    append("${subject["subjectType"]}: ")
+                                }
+                                withStyle(
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.secondary.copy(
+                                            alpha = 0.8f
+                                        ), fontSize = 14.sp
+                                    ).toSpanStyle()
+                                ) {
+                                    append("${subject["startTime"]} - ${subject["endTime"]}")
+                                }
+                            })
 
-                                Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
 
-                                Text(
-                                    text = "${subject["subjectName"]}",
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        color = MaterialTheme.colorScheme.secondary,
-                                        fontSize = 14.5.sp,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
+                            Text(
+                                text = "${subject["subjectName"]}",
+                                style = MaterialTheme.typography.bodyLarge.copy(
+                                    color = MaterialTheme.colorScheme.secondary,
+                                    fontSize = 14.5.sp,
+                                    fontWeight = FontWeight.SemiBold
                                 )
+                            )
 
-                                Spacer(modifier = Modifier.height(6.dp))
+                            Spacer(modifier = Modifier.height(6.dp))
 
-                                Text(text = buildAnnotatedString {
-                                    withStyle(
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.secondary.copy(
-                                                alpha = 0.9f
-                                            ), fontSize = 14.sp
-                                        ).toSpanStyle()
-                                    ) {
-                                        append("აუდიტორია: ")
-                                    }
-                                    withStyle(
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.secondary.copy(
-                                                alpha = 0.8f
-                                            ), fontSize = 14.sp
-                                        ).toSpanStyle()
-                                    ) {
-                                        append("${subject["auditorium"]}")
-                                    }
-                                })
+                            Text(text = buildAnnotatedString {
+                                withStyle(
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.secondary.copy(
+                                            alpha = 0.9f
+                                        ), fontSize = 14.sp
+                                    ).toSpanStyle()
+                                ) {
+                                    append("აუდიტორია: ")
+                                }
+                                withStyle(
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.secondary.copy(
+                                            alpha = 0.8f
+                                        ), fontSize = 14.sp
+                                    ).toSpanStyle()
+                                ) {
+                                    append("${subject["auditorium"]}")
+                                }
+                            })
 
-                                Text(text = buildAnnotatedString {
-                                    withStyle(
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.secondary.copy(
-                                                alpha = 0.9f
-                                            ), fontSize = 14.sp
-                                        ).toSpanStyle()
-                                    ) {
-                                        append("პედაგოგი: ")
-                                    }
-                                    withStyle(
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            color = MaterialTheme.colorScheme.secondary.copy(
-                                                alpha = 0.8f
-                                            ), fontSize = 14.sp
-                                        ).toSpanStyle()
-                                    ) {
-                                        append("${subject["fullName"]}")
-                                    }
-                                })
-                            }
+                            Text(text = buildAnnotatedString {
+                                withStyle(
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.secondary.copy(
+                                            alpha = 0.9f
+                                        ), fontSize = 14.sp
+                                    ).toSpanStyle()
+                                ) {
+                                    append("პედაგოგი: ")
+                                }
+                                withStyle(
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        color = MaterialTheme.colorScheme.secondary.copy(
+                                            alpha = 0.8f
+                                        ), fontSize = 14.sp
+                                    ).toSpanStyle()
+                                ) {
+                                    append("${subject["fullName"]}")
+                                }
+                            })
                         }
                     }
                 }

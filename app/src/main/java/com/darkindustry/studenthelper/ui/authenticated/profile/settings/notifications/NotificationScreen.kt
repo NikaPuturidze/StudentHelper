@@ -10,9 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -23,7 +21,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.scale
-import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -41,8 +39,8 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 fun NotificationScreen(
     profileViewModel: ProfileViewModel = hiltViewModel(),
     navController: NavHostController,
-    dbLessonReminder: Boolean
-){
+    dbLessonReminder: Boolean,
+) {
     rememberSystemUiController().apply {
         setStatusBarColor(color = MaterialTheme.colorScheme.background)
         setNavigationBarColor(color = MaterialTheme.colorScheme.background)
@@ -58,7 +56,7 @@ fun NotificationScreen(
             .background(color = MaterialTheme.colorScheme.background),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-    ){
+    ) {
         NotificationScreenForm(
             navController = navController,
             dbLessonReminder = dbLessonReminder
@@ -75,14 +73,9 @@ fun NotificationScreenForm(
     apiViewModel: ApiViewModel = hiltViewModel(),
     navController: NavHostController,
     dbLessonReminder: Boolean,
-){
-    CustomHeader(title = "Notifications", left = {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_arrow_left),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(32.dp)
-        ) },
+) {
+    CustomHeader(title = stringResource(R.string.authenticated_settings_notifications_header),
+        leftIcon = R.drawable.ic_arrow_left,
         onLeftClick = {
             navController.popBackStack()
         }
@@ -95,53 +88,41 @@ fun NotificationScreenForm(
             .padding(GLOBAL_PADDINGS),
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
-    ){
+    ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 4.dp),
+                .padding(start = 2.dp, top = 8.dp, bottom = 4.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Start
         ) {
             Text(
-                text = "General", style = MaterialTheme.typography.titleMedium.copy(
+                text = stringResource(R.string.authenticated_settings_notifications_item_general_label),
+                style = MaterialTheme.typography.titleMedium.copy(
                     color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.77f),
                     fontSize = 14.sp,
                 )
             )
         }
 
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(bottom = 12.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(MaterialTheme.colorScheme.onBackground),
-        ) {
-            val padding = Modifier.padding(start = 16.dp)
-
-            Spacer(modifier = Modifier.height(2.dp))
-            SettingsItem(
-                primaryText = "Daily Lesson Reminder",
-                secondaryIconComposable = {
-                    Box(
-                        modifier = Modifier
-                            .scale(0.8f)
-                    ) {
-                        Switch(
-                            checked = dbLessonReminder,
-                            onCheckedChange = {
-                                apiViewModel.updateUserData(
-                                    fieldPath = "notifications.dailyLessonReminder",
-                                    newValue = it
-                                )
-                            }
-                        )
-                    }
-                }, modifier = padding
-            ) {
-
+        SettingsItem(
+            primaryText = stringResource(R.string.authenticated_settings_notifications_item_general_daily_lesson_reminder_placeeholder),
+            secondaryIconComposable = {
+                Box(
+                    modifier = Modifier
+                        .scale(0.8f)
+                ) {
+                    Switch(
+                        checked = dbLessonReminder,
+                        onCheckedChange = {
+                            apiViewModel.updateUserData(
+                                fieldPath = "notifications.dailyLessonReminder",
+                                newValue = it
+                            )
+                        }
+                    )
+                }
             }
-        }
+        ) {}
     }
 }

@@ -35,8 +35,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -62,10 +64,10 @@ fun ProfileScreen(
     navController: NavHostController,
     paddingValues: PaddingValues,
     dbUsername: String,
-    dbUniversityLinked: String
+    dbUniversityLinked: String,
 ) {
     rememberSystemUiController().apply {
-        setStatusBarColor(color = MaterialTheme.colorScheme.background)
+        setStatusBarColor(color = MaterialTheme.colorScheme.onBackground)
         setNavigationBarColor(color = MaterialTheme.colorScheme.onBackground)
     }
 
@@ -99,7 +101,7 @@ fun ProfileScreen(
     fun launchQRCodeScanner() {
         val options = ScanOptions().apply {
             setDesiredBarcodeFormats(ScanOptions.QR_CODE)
-            setPrompt("Scan a QR code to log in")
+            setPrompt("დაასკანირე QR კოდი ვებ-საიტზე")
             setCameraId(0)
             setBeepEnabled(false)
             setOrientationLocked(true)
@@ -118,21 +120,24 @@ fun ProfileScreen(
         }
     }
 
-    if (showAcceptDialog == true){
-        CustomAlertDialog(title = "QR Code Scanned",
-            message = "Do you want to approve QR login?",
-            confirmButtonText = "Approve",
-            cancelButtonText = "Disapprove",
+    if (showAcceptDialog == true) {
+        CustomAlertDialog(title = "QR ავტორიზაცია",
+            message = "გსურს თუ არა ავტორიზაციის დადასტურება?",
+            confirmButtonText = "დადასტურება",
+            cancelButtonText = "გაუქმება",
             onConfirm = {
                 profileViewModel.updateSessionStatus(
                     uniqueId = profileViewModel.uniqueId.value,
                     status = "success",
                     onSuccess = {
-                        profileViewModel.setMessage("Login success!", MessageType.SUCCESS)
+                        profileViewModel.setMessage("წარმატებული ავტორიზაცია.", MessageType.SUCCESS)
                         showAcceptDialog = false
                     },
                     onFailure = {
-                        profileViewModel.setMessage("Login failed!", MessageType.ERROR)
+                        profileViewModel.setMessage(
+                            "ავტორიზაცია ვერ მოხდა, გთხოვ სცადე ხელახლა.",
+                            MessageType.ERROR
+                        )
                         showAcceptDialog = false
                     }
                 )
@@ -183,28 +188,23 @@ private fun ProfileScreenForm(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        CustomHeader(title = "Profile", left = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_qr),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(24.dp)
-            )
-        }, onLeftClick = {
-            if (ContextCompat.checkSelfPermission(
-                    context, Manifest.permission.CAMERA
-                ) == PackageManager.PERMISSION_GRANTED
-            ) launchQRCodeScanner() else requestCameraPermissionLauncher()
-        }, right = {
-            Icon(
-                painter = painterResource(id = R.drawable.ic_settings_outlined),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.secondary,
-                modifier = Modifier.size(28.dp)
-            )
-        }, onRightClick = {
-            navController.navigate(NavigationRoute.Authenticated.Settings.General.route)
-        })
+        CustomHeader(
+            title = stringResource(R.string.authenticated_profile_header_title),
+            leftIcon = R.drawable.ic_qr,
+            onLeftClick = {
+                if (ContextCompat.checkSelfPermission(
+                        context, Manifest.permission.CAMERA
+                    ) == PackageManager.PERMISSION_GRANTED
+                ) launchQRCodeScanner() else requestCameraPermissionLauncher()
+            },
+            rightIcon = R.drawable.ic_settings_outlined,
+            onRightClick = {
+                navController.navigate(NavigationRoute.Authenticated.Settings.General.route) {
+                    launchSingleTop = true
+
+                    restoreState = true
+                }
+            })
 
         Column(
             modifier = Modifier
@@ -217,7 +217,11 @@ private fun ProfileScreenForm(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .shadow(elevation = GLOBAL_ELEVATION, shape = RoundedCornerShape(12.dp), clip = true)
+                    .shadow(
+                        elevation = GLOBAL_ELEVATION,
+                        shape = RoundedCornerShape(12.dp),
+                        clip = true
+                    )
                     .clip(RoundedCornerShape(12.dp))
                     .background(MaterialTheme.colorScheme.onBackground)
             ) {

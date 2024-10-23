@@ -17,12 +17,14 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavHostController
+import com.darkindustry.studenthelper.R
 import com.darkindustry.studenthelper.logic.api.tsu.ApiViewModel
 import com.darkindustry.studenthelper.logic.utils.MessageBox
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationButton
@@ -39,7 +41,7 @@ fun HomeScreen(
     dbUniversityLinked: String
 ) {
     rememberSystemUiController().apply {
-        setStatusBarColor(color = MaterialTheme.colorScheme.background)
+        setStatusBarColor(color = MaterialTheme.colorScheme.onBackground)
         setNavigationBarColor(color = MaterialTheme.colorScheme.onBackground)
     }
 
@@ -77,41 +79,16 @@ fun HomeScreenForm(
     universityLinked: String,
 ) {
     CustomHeader(
-        title = "Dashboard",
+        title = stringResource(R.string.authenticated_home_header),
     )
 
-    if (universityLinked.isEmpty()) {
-        Column(
-            modifier = Modifier.fillMaxSize(),
-            verticalArrangement = Arrangement.Center,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
-            Text(
-                text = "To view your schedule, please link your university account first.",
-                style = MaterialTheme.typography.titleLarge.copy(
-                    color = MaterialTheme.colorScheme.secondary,
-                    fontSize = 20.sp,
-                    textAlign = TextAlign.Center
-                )
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            ApplicationButton(
-                text = "Link University",
-                width = 0.5f,
-                onClick = {
-                    navController.navigate(NavigationRoute.Authenticated.Settings.Connections.route)
-                }
-            )
-        }
-    } else {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 14.dp),
-            verticalArrangement = Arrangement.Top,
-            horizontalAlignment = Alignment.CenterHorizontally
-        ){
+    Column(
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 14.dp),
+        verticalArrangement = Arrangement.Top,
+        horizontalAlignment = Alignment.CenterHorizontally
+    ){
 
-        }
     }
 }

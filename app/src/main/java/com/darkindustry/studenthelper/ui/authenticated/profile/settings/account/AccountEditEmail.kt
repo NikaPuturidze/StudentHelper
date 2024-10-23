@@ -1,5 +1,7 @@
 package com.darkindustry.studenthelper.ui.authenticated.profile.settings.account
 
+import android.os.Build
+import androidx.annotation.RequiresExtension
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
@@ -7,16 +9,15 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.text.ClickableText
-import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -30,10 +31,11 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import com.darkindustry.studenthelper.R
@@ -45,10 +47,11 @@ import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationBut
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.ApplicationTextField
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.CustomAlertDialog
 import com.darkindustry.studenthelper.logic.utils.Utils.Companion.CustomHeader
+import com.darkindustry.studenthelper.navigation.NavigationRoute
 import com.darkindustry.studenthelper.ui.authenticated.profile.ProfileViewModel
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
-import com.google.firebase.Timestamp
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun AccountEditEmail(
     profileViewModel: ProfileViewModel = hiltViewModel(),
@@ -57,11 +60,10 @@ fun AccountEditEmail(
     dbEmail: String,
 ) {
     rememberSystemUiController().apply {
-        setStatusBarColor(color = MaterialTheme.colorScheme.background)
+        setStatusBarColor(color = MaterialTheme.colorScheme.onBackground)
         setNavigationBarColor(color = MaterialTheme.colorScheme.background)
     }
 
-    val showCodeEnterField by profileViewModel.showCodeEnterField.collectAsState()
     val userEnteredCode by profileViewModel.userEnteredVerificationCodeMutable.collectAsState()
     val isCodeVisible by profileViewModel.codeVisible.collectAsState()
 
@@ -70,11 +72,9 @@ fun AccountEditEmail(
     val messageType by profileViewModel.messageType.collectAsState()
 
     val (isResendEnabled, setResendEnabled) = remember { mutableStateOf(true) }
-    val (isEmailVerificationEnabled, setEmailVerificationEnabled) = remember { mutableStateOf(true) }
 
     var newEmail by remember { mutableStateOf("") }
     var showBackDialog by remember { mutableStateOf(false) }
-    var showConfirmDialog by remember { mutableStateOf(false) }
     var isSaved by remember { mutableStateOf(true) }
 
     val focusRequester = remember { FocusRequester() }
@@ -82,42 +82,24 @@ fun AccountEditEmail(
 
     val regex = "^[^@]+@[^@]+\\.[^@]+\$".toRegex()
 
+    LaunchedEffect(Unit) {
+        focusRequester.requestFocus()
+    }
+
     if (showBackDialog) {
-        CustomAlertDialog(title = "Unsaved Changes",
-            message = "You have unsaved changes. Are you sure you want to leave without saving them?",
-            confirmButtonText = "Exit",
-            cancelButtonText = "Cancel",
+        CustomAlertDialog(title = "შეუნახავი ცვლილებები",
+            message = "გასვლის შემთხვევაში, ყოველგვარი ცვლილება დაიკარგება, დარწმუნებული ხარ რომ გასვლა გსურს?",
+            confirmButtonText = "გასვლა",
+            cancelButtonText = "გაგრძელება",
             onConfirm = {
-                navController.popBackStack()
-                navController.popBackStack()
+                navController.popBackStack(
+                    route = NavigationRoute.Authenticated.Settings.Account.route,
+                    inclusive = false
+                )
             },
             onCancel = {
                 focusManager.clearFocus()
                 showBackDialog = false
-            }
-        )
-    }
-
-    if (showConfirmDialog) {
-        CustomAlertDialog(title = "Confirm changes",
-            message = "Are you sure you want to save these changes? You'll be unable to change your email again for the next 30 days",
-            confirmButtonText = "Confirm",
-            cancelButtonText = "Discard",
-            onConfirm = {
-                focusManager.clearFocus()
-                apiViewModel.updateUserData(fieldPath = "email", newValue = newEmail)
-                apiViewModel.updateUserData(
-                    fieldPath = "emailChangedAt",
-                    newValue = Timestamp.now()
-                )
-                isSaved = true
-                navController.popBackStack()
-                navController.popBackStack()
-            },
-            onCancel = {
-                focusManager.clearFocus()
-                navController.popBackStack()
-                navController.popBackStack()
             }
         )
     }
@@ -133,9 +115,7 @@ fun AccountEditEmail(
             profileViewModel = profileViewModel,
             navController = navController,
             isSaved = isSaved,
-            showCodeEnterField = showCodeEnterField,
             isCodeVisible = isCodeVisible,
-            isEmailVerificationEnabled = isEmailVerificationEnabled,
             isResendEnabled = isResendEnabled,
             newEmail = newEmail,
             initialEmail = dbEmail,
@@ -143,10 +123,8 @@ fun AccountEditEmail(
             focusRequester = focusRequester,
             focusManager = focusManager,
             regex = regex,
-            setEmailVerificationEnabled = { setEmailVerificationEnabled(it) },
             setResendEnabled = { setResendEnabled(it) },
             showBackDialog = { showBackDialog = it },
-            showConfirmDialog = { showConfirmDialog = it },
             onEmailChange = { newValue ->
                 newEmail = newValue
                 isSaved = false
@@ -159,14 +137,13 @@ fun AccountEditEmail(
     )
 }
 
+@RequiresExtension(extension = Build.VERSION_CODES.S, version = 7)
 @Composable
 fun AccountEditEmailForm(
     profileViewModel: ProfileViewModel,
     navController: NavHostController,
     isSaved: Boolean,
-    showCodeEnterField: Boolean,
     isCodeVisible: Boolean,
-    isEmailVerificationEnabled: Boolean,
     isResendEnabled: Boolean,
     newEmail: String,
     initialEmail: String,
@@ -174,27 +151,23 @@ fun AccountEditEmailForm(
     focusRequester: FocusRequester,
     focusManager: FocusManager,
     regex: Regex,
-    setEmailVerificationEnabled: (Boolean) -> Unit,
     setResendEnabled: (Boolean) -> Unit,
     showBackDialog: (Boolean) -> Unit,
-    showConfirmDialog: (Boolean) -> Unit,
     onEmailChange: (String) -> Unit,
 ) {
-    CustomHeader(title = "Email", left = {
-        Icon(
-            painter = painterResource(id = R.drawable.ic_arrow_left),
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.size(32.dp)
-        )
-    }, onLeftClick = {
-        if (isSaved || newEmail == initialEmail) {
-            navController.popBackStack()
-            navController.popBackStack()
-        } else {
-            showBackDialog(true)
-        }
-    })
+    CustomHeader(
+        title = stringResource(R.string.authenticated_settings_account_edit_email_header),
+        leftIcon = R.drawable.ic_arrow_left,
+        onLeftClick = {
+            if (isSaved || newEmail == initialEmail) {
+                navController.popBackStack(
+                    route = NavigationRoute.Authenticated.Settings.Account.route,
+                    inclusive = false
+                )
+            } else {
+                showBackDialog(true)
+            }
+        })
 
     Column(
         modifier = Modifier
@@ -203,101 +176,38 @@ fun AccountEditEmailForm(
         verticalArrangement = Arrangement.Top,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
+        var proceed by remember { mutableStateOf(false) }
+
         ApplicationTextField(
-            topTextComposable = {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 4.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.Start
-                ) {
-                    Text(
-                        text = "Email", style = MaterialTheme.typography.titleMedium.copy(
-                            fontSize = 14.sp,
-                            color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.77f),
-                        )
-                    )
-                }
-            },
+            topText = stringResource(R.string.authenticated_settings_account_edit_email_new_email_label),
             value = newEmail,
             onValueChange = onEmailChange,
-            placeholderText = "Enter new email",
-            trailingIcon = {
-                Row(
-                    modifier = Modifier.padding(end = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End
-                ) {
-                    val annotatedString = buildAnnotatedString {
-                        pushStringAnnotation(tag = "ACTION", annotation = "performAction")
-                        append("Verify email")
-                        pop()
-                    }
-
-                    @Suppress("DEPRECATION") ClickableText(text = annotatedString,
-                        style = TextStyle(
-                            fontSize = 18.sp,
-                            color = if (isEmailVerificationEnabled && newEmail.isNotEmpty() && regex.matches(
-                                    newEmail
-                                ) && initialEmail != newEmail
-                            ) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
-                            }
-                        ),
-                        onClick = { offset ->
-                            if (isEmailVerificationEnabled && newEmail.isNotEmpty() && regex.matches(
-                                    newEmail
-                                ) && initialEmail != newEmail
-                            ) {
-                                annotatedString.getStringAnnotations(
-                                    tag = "ACTION", start = offset, end = offset
-                                ).firstOrNull()?.let { annotation ->
-                                    if (annotation.item == "performAction") {
-                                        focusManager.clearFocus()
-                                        profileViewModel.sendVerificationCode(
-                                            newEmail,
-                                            onSuccess = {
-                                                profileViewModel.setShowCodeEnterField(true)
-                                                setEmailVerificationEnabled(false)
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    )
-                }
+            placeholderText = stringResource(R.string.authenticated_settings_account_edit_email_new_email_placeholder),
+            enabled = !proceed,
+            leadingIcon = {
+                Image(
+                    painter = painterResource(id = R.drawable.ic_envelope),
+                    colorFilter = ColorFilter.tint(MaterialTheme.colorScheme.secondary),
+                    contentDescription = "Email",
+                    modifier = Modifier.size(20.dp)
+                )
             },
-            modifier = Modifier
-                .focusRequester(focusRequester)
-                .padding(bottom = 12.dp)
+            modifier = Modifier.focusRequester(focusRequester)
         )
+        Spacer(modifier = Modifier.height(16.dp))
 
-        if (showCodeEnterField) {
+        LaunchedEffect(proceed) {
+            if (proceed) {
+                focusRequester.requestFocus()
+            }
+        }
+
+        if (proceed) {
             ApplicationTextField(
-                topTextComposable = {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Start
-                    ) {
-                        Text(
-                            text = "Verification Code",
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontSize = 14.sp,
-                                color = MaterialTheme.colorScheme.secondary.copy(alpha = 0.77f),
-                            )
-                        )
-                    }
-                },
+                topText = stringResource(R.string.authenticated_settings_account_edit_email_new_email_verify_label),
                 value = userEnteredCode,
-                onValueChange = { if (it.length <= 6) profileViewModel.onUserEnteredCodeChange(it) },
-                placeholderText = "Enter Code",
+                onValueChange = profileViewModel::onUserEnteredCodeChange,
+                placeholderText = stringResource(R.string.authenticated_settings_account_edit_email_new_email_verify_placeholder),
                 trailingIcon = {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -324,15 +234,19 @@ fun AccountEditEmailForm(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.End
                         ) {
+
                             val annotatedString = buildAnnotatedString {
-                                pushStringAnnotation(tag = "ACTION", annotation = "performAction")
-                                append("Resend Code")
+                                pushStringAnnotation(
+                                    tag = "ახალი კოდი",
+                                    annotation = "performAction"
+                                )
+                                append(stringResource(R.string.authenticated_settings_account_edit_email_new_email_resend_code))
                                 pop()
                             }
 
-                            @Suppress("DEPRECATION") ClickableText(text = annotatedString,
+                            ClickableText(text = annotatedString,
                                 style = TextStyle(
-                                    fontSize = 18.sp, color = if (isResendEnabled) {
+                                    color = if (isResendEnabled) {
                                         MaterialTheme.colorScheme.primary
                                     } else {
                                         MaterialTheme.colorScheme.secondary.copy(alpha = 0.5f)
@@ -341,7 +255,7 @@ fun AccountEditEmailForm(
                                 onClick = { offset ->
                                     if (isResendEnabled) {
                                         annotatedString.getStringAnnotations(
-                                            tag = "ACTION", start = offset, end = offset
+                                            tag = "ახალი კოდი", start = offset, end = offset
                                         ).firstOrNull()?.let { annotation ->
                                             if (annotation.item == "performAction") {
                                                 focusManager.clearFocus()
@@ -363,19 +277,56 @@ fun AccountEditEmailForm(
                         }
                     }
                 },
-                modifier = Modifier.padding(bottom = 12.dp)
-
+                keyboardType = KeyboardType.Number,
+                modifier = Modifier
+                    .padding(bottom = 12.dp)
+                    .focusRequester(focusRequester)
             )
         }
-
-        ApplicationButton(
-            onClick = {
-                showConfirmDialog(true)
-            },
-            text = "Change Email",
-            enabled = userEnteredCode.length == 6 && newEmail.isNotEmpty() && regex.matches(
-                newEmail
-            ) && initialEmail != newEmail
-        )
+        if (!proceed) {
+            ApplicationButton(
+                text = "გაგრძელება",
+                onClick = {
+                    if (newEmail.isNotEmpty() && regex.matches(
+                            newEmail
+                        ) && initialEmail != newEmail
+                    ) {
+                        profileViewModel.checkEmailtoChange(
+                            newEmail,
+                            onSuccess = {
+                                profileViewModel.sendVerificationCode(
+                                    newEmail,
+                                    onSuccess = { proceed = true }
+                                )
+                                focusManager.clearFocus()
+                            }
+                        )
+                    } else {
+                        profileViewModel.setMessage("შეიყვანეთ ახალი ელ.ფოსტა", MessageType.ERROR)
+                    }
+                }
+            )
+        } else {
+            ApplicationButton(
+                text = "ელ.ფოსტის შეცვლა",
+                onClick = {
+                    focusManager.clearFocus()
+                    profileViewModel.verifyCode(
+                        newEmail,
+                        userEnteredCode,
+                        onSuccess = {
+                            profileViewModel.changeCurrentUserEmail(newEmail,
+                                onSuccess = {
+                                    navController.popBackStack(
+                                        route = NavigationRoute.Authenticated.Settings.Account.route,
+                                        inclusive = false
+                                    )
+                                }
+                            )
+                        }
+                    )
+                }
+            )
+        }
     }
 }
